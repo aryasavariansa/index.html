@@ -3,57 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arya Savariansah - Portfolio Dashboard</title>
+    <title>Arya Savariansah - Portfolio</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- CryptoJS for AES encryption -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
         /* ===== RESET & VARIABLES ===== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         :root {
             --primary: #ffd700;
             --primary-dark: #ffcc00;
+            --primary-light: #fff8e1;
             --secondary: #00ffff;
             --danger: #ff4757;
             --success: #2ed573;
+            --warning: #ffa502;
             --dark: #0a0a0a;
             --dark-light: #1a1a1a;
             --light: #ffffff;
             --gray: #8a8a8a;
-            --sidebar-width: 280px;
             --border-radius: 16px;
             --box-shadow: 0 10px 40px rgba(0,0,0,0.3);
             --transition: all 0.3s ease;
-            --gradient-gold: linear-gradient(135deg, #ffd700, #ffed4e);
-            --gradient-cyan: linear-gradient(135deg, #00ffff, #00bcd4);
-            --gradient-purple: linear-gradient(135deg, #a855f7, #c084fc);
-            --gradient-danger: linear-gradient(135deg, #ff4757, #ff6b81);
+            --gradient-gold: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            --gradient-cyan: linear-gradient(135deg, #00ffff 0%, #00bcd4 100%);
+            --gradient-purple: linear-gradient(135deg, #a855f7 0%, #c084fc 100%);
+            --gradient-danger: linear-gradient(135deg, #ff4757 0%, #ff6b81 100%);
+            --font-primary: 'Poppins', sans-serif;
+            --sidebar-width: 280px;
         }
 
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
+            font-family: var(--font-primary);
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
             color: var(--light);
             min-height: 100vh;
             overflow-x: hidden;
             line-height: 1.6;
         }
+        button { background: none; border: none; cursor: pointer; font: inherit; }
+        a { text-decoration: none; color: inherit; }
 
         /* ===== LAYOUT ===== */
-        .app-container {
-            display: flex;
-        }
-
-        /* Sidebar */
+        .app-container { display: flex; min-height: 100vh; }
         .sidebar {
             width: var(--sidebar-width);
-            background: linear-gradient(180deg, #0f0f0f, #1a1a1a);
+            background: linear-gradient(180deg, #0f0f0f 0%, #1a1a1a 100%);
             height: 100vh;
             position: fixed;
             left: 0;
@@ -61,1074 +57,355 @@
             overflow-y: auto;
             border-right: 1px solid rgba(255,215,0,0.1);
             z-index: 100;
-            transition: transform 0.4s ease;
+            transition: var(--transition);
         }
-
-        .sidebar-header {
-            padding: 40px 30px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .profile-section {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .profile-img-container {
-            position: relative;
-            cursor: pointer;
-        }
-
+        .sidebar-header { padding: 40px 30px 30px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .profile-section { display: flex; align-items: center; gap: 20px; margin-bottom: 30px; }
+        .profile-img-container { position: relative; cursor: pointer; flex-shrink: 0; }
         .profile-img {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
+            width: 70px; height: 70px; border-radius: 50%;
             background: var(--gradient-gold);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            color: #000;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px; color: #000;
             border: 3px solid rgba(255,215,0,0.5);
             overflow: hidden;
         }
-
         .profile-img-upload {
-            position: absolute;
-            bottom: -5px;
-            right: -5px;
-            background: var(--gradient-gold);
-            color: #000;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
+            position: absolute; bottom: -5px; right: -5px;
+            background: var(--gradient-gold); color: #000;
+            border-radius: 50%; width: 30px; height: 30px;
+            display: none; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 0.8rem;
+            box-shadow: 0 4px 10px rgba(255,215,0,0.3);
         }
-
-        .admin-mode .profile-img-upload {
-            display: flex;
-        }
-
-        .profile-info h2 {
-            font-size: 1.4rem;
-            margin-bottom: 8px;
-        }
-
-        .profile-info p {
-            color: var(--primary);
-            font-size: 0.9rem;
-        }
+        .admin-mode .profile-img-upload { display: flex; }
+        .profile-info h2 { font-size: 1.4rem; font-weight: 700; color: var(--light); }
+        .profile-info p { font-size: 0.9rem; color: var(--primary); }
 
         /* Navigation */
-        .nav-menu {
-            list-style: none;
-            padding: 30px 0;
+        .nav-menu { list-style: none; padding: 30px 0; flex-grow: 1; }
+        .nav-menu li { margin-bottom: 5px; }
+        .nav-menu a {
+            display: flex; align-items: center; color: #aaa;
+            padding: 16px 30px; transition: var(--transition);
+            font-weight: 500; border-left: 3px solid transparent;
         }
-
-        .nav-menu li a {
-            display: flex;
-            align-items: center;
-            color: #aaa;
-            padding: 16px 30px;
-            transition: var(--transition);
-            border-left: 3px solid transparent;
+        .nav-menu a:hover, .nav-menu a.active {
+            color: var(--primary); background: linear-gradient(90deg, rgba(255,215,0,0.1), transparent);
+            border-left-color: var(--primary); transform: translateX(5px);
         }
+        .nav-menu a i { width: 24px; margin-right: 15px; font-size: 1.2rem; }
 
-        .nav-menu li a:hover,
-        .nav-menu li a.active {
-            color: var(--primary);
-            background: linear-gradient(90deg, rgba(255,215,0,0.1), transparent);
-            border-left-color: var(--primary);
-        }
-
-        .nav-menu li a i {
-            width: 24px;
-            margin-right: 15px;
-            font-size: 1.2rem;
-        }
-
-        /* Admin Panel */
-        .admin-section {
-            padding: 25px 30px;
-            border-top: 1px solid rgba(255,255,255,0.05);
-        }
-
+        /* Admin Section */
+        .admin-section { padding: 25px 30px; border-top: 1px solid rgba(255,255,255,0.05); }
         .admin-toggle {
-            background: linear-gradient(135deg, #1e1e1e, #2a2a2a);
-            color: var(--primary);
-            border: 1px solid rgba(255,215,0,0.3);
-            width: 100%;
-            padding: 14px;
-            border-radius: 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            font-weight: 600;
-            transition: var(--transition);
+            background: linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%);
+            color: var(--primary); border: 1px solid rgba(255,215,0,0.3);
+            width: 100%; padding: 14px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            font-weight: 600; transition: var(--transition);
         }
-
-        .admin-toggle:hover {
-            transform: translateY(-3px);
-            border-color: var(--primary);
-        }
-
+        .admin-toggle:hover { transform: translateY(-3px); border-color: var(--primary); }
         .admin-panel {
-            background: linear-gradient(135deg, #1a1a1a, #252525);
-            border-radius: var(--border-radius);
-            padding: 25px;
-            margin-top: 20px;
-            display: none;
-            border: 1px solid rgba(255,215,0,0.1);
+            background: linear-gradient(135deg, #1a1a1a 0%, #252525 100%);
+            border-radius: var(--border-radius); padding: 25px; margin-top: 20px;
+            display: none; border: 1px solid rgba(255,215,0,0.1);
         }
-
-        .admin-panel.active {
-            display: block;
-        }
-
+        .admin-panel.active { display: block; }
         .admin-input {
-            width: 100%;
-            padding: 12px 16px;
-            margin-bottom: 15px;
-            background: #0f0f0f;
-            border: 2px solid rgba(255,255,255,0.1);
-            border-radius: 10px;
-            color: var(--light);
+            width: 100%; padding: 12px 16px; margin-bottom: 15px;
+            background: #0f0f0f; border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 10px; color: var(--light);
         }
-
-        .admin-input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
+        .admin-input:focus { outline: none; border-color: var(--primary); }
         .admin-btn {
-            width: 100%;
-            padding: 14px;
-            background: var(--gradient-gold);
-            color: #000;
-            border: none;
-            border-radius: 10px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: var(--transition);
+            width: 100%; padding: 14px; background: var(--gradient-gold);
+            color: #000; border: none; border-radius: 10px;
+            font-weight: 700; cursor: pointer; transition: var(--transition);
             margin-bottom: 10px;
         }
-
-        .admin-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255,215,0,0.3);
-        }
-
-        .sidebar-footer {
-            padding: 25px 30px;
-            color: var(--gray);
-            font-size: 0.85rem;
-            text-align: center;
-        }
+        .admin-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255,215,0,0.3); }
 
         /* Main Content */
-        .main-content {
-            flex: 1;
-            margin-left: var(--sidebar-width);
-            min-height: 100vh;
-            overflow-y: auto;
-            background: linear-gradient(135deg, rgba(10,10,10,0.95), rgba(26,26,26,0.98));
-        }
-
+        .main-content { flex: 1; margin-left: var(--sidebar-width); min-height: 100vh; overflow-y: auto; }
         .content-header {
-            background: linear-gradient(135deg, rgba(30,30,30,0.9), rgba(26,26,26,0.95));
-            padding: 30px 50px;
-            position: sticky;
-            top: 0;
-            z-index: 99;
-            backdrop-filter: blur(10px);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            background: rgba(30,30,30,0.9); backdrop-filter: blur(10px);
+            padding: 30px 50px; border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 99;
         }
-
-        .page-title h2 {
-            font-size: 2.2rem;
-            background: var(--gradient-gold);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .page-title p {
-            color: var(--gray);
-            font-size: 1.1rem;
-        }
-
+        .page-title h2 { font-size: 2.2rem; background: var(--gradient-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .page-title p { color: var(--gray); font-size: 1.1rem; }
         .edit-status {
-            color: var(--primary);
-            background: rgba(255,215,0,0.1);
-            padding: 10px 20px;
-            border-radius: 50px;
-            display: none;
-            border: 1px solid rgba(255,215,0,0.2);
+            color: var(--primary); padding: 10px 20px;
+            background: rgba(255,215,0,0.1); border-radius: 50px;
+            display: none; border: 1px solid rgba(255,215,0,0.2);
+        }
+        .content-body { padding: 50px; }
+        .page { display: none; animation: fadeInUp 0.6s ease; }
+        .page.active { display: block; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Mobile Menu Toggle */
+        .mobile-menu-toggle {
+            display: none; position: fixed; top: 25px; right: 25px;
+            background: var(--gradient-gold); color: #000; border: none;
+            border-radius: 12px; padding: 15px; font-size: 1.4rem;
+            cursor: pointer; z-index: 101; box-shadow: 0 5px 15px rgba(255,215,0,0.3);
+        }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); width: 100%; max-width: 320px; }
+            .sidebar.active { transform: translateX(0); }
+            .main-content { margin-left: 0; }
+            .mobile-menu-toggle { display: block; }
+            .content-header { padding: 20px; flex-direction: column; align-items: flex-start; gap: 20px; }
+            .content-body { padding: 20px; }
         }
 
-        /* Content Body */
-        .content-body {
-            padding: 50px;
-        }
-
-        .page {
-            display: none;
-            animation: fadeInUp 0.6s ease;
-        }
-
-        .page.active {
-            display: block;
-        }
-
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Floating Buttons */
-        .floating-add-btn, .effect-toggle {
-            position: fixed;
-            right: 40px;
-            background: var(--gradient-gold);
-            color: #000;
-            border: none;
-            border-radius: 50px;
-            padding: 15px 25px;
-            font-weight: 700;
-            cursor: pointer;
-            box-shadow: 0 10px 30px rgba(255,215,0,0.3);
-            z-index: 999;
-            display: none;
-            align-items: center;
-            gap: 10px;
-            transition: var(--transition);
-        }
-
-        .floating-add-btn {
-            top: 100px;
-        }
-
-        .effect-toggle {
-            bottom: 100px;
-        }
-
-        .admin-mode .floating-add-btn {
-            display: flex;
-        }
-
-        /* Home Page */
+        /* ===== HOME PAGE ===== */
         .home-hero {
-            padding: 80px 40px;
+            position: relative; padding: 80px 40px;
             background: linear-gradient(135deg, rgba(10,10,10,0.95), rgba(26,26,26,0.9));
-            border-radius: 20px;
-            margin-bottom: 60px;
-            text-align: center;
+            border-radius: var(--border-radius); margin-bottom: 60px;
+            overflow: hidden; min-height: 500px; display: flex; align-items: center; justify-content: center;
             border: 1px solid rgba(255,215,0,0.15);
         }
-
+        .hero-content { position: relative; z-index: 2; text-align: center; max-width: 900px; }
         .hero-badge {
-            display: inline-block;
-            background: var(--gradient-gold);
-            color: #000;
-            padding: 12px 24px;
-            border-radius: 50px;
-            margin-bottom: 25px;
-            font-weight: 700;
+            display: inline-block; background: var(--gradient-gold); color: #000;
+            padding: 12px 24px; border-radius: 50px; font-weight: 700; margin-bottom: 25px;
             animation: float 6s infinite;
         }
-
-        @keyframes float {
-            0%,100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
         .hero-title {
-            font-size: 3.8rem;
-            background: var(--gradient-gold);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 15px;
+            font-size: 3.8rem; background: var(--gradient-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 15px; font-weight: 800; line-height: 1.1;
         }
-
-        .hero-subtitle {
-            font-size: 1.6rem;
-            color: var(--secondary);
-            margin-bottom: 25px;
-        }
-
-        .hero-description {
-            font-size: 1.2rem;
-            color: #ddd;
-            max-width: 800px;
-            margin: 0 auto 30px;
-        }
-
-        .hero-actions {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-        }
-
+        .hero-subtitle { font-size: 1.6rem; color: var(--secondary); margin-bottom: 25px; font-weight: 600; }
+        .hero-description { font-size: 1.2rem; color: #ddd; max-width: 800px; margin: 0 auto 30px; line-height: 1.8; }
+        .hero-actions { margin-top: 30px; display: flex; justify-content: center; gap: 20px; }
         .hero-btn {
-            padding: 15px 35px;
-            background: var(--gradient-gold);
-            color: #000;
-            border-radius: 50px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: var(--transition);
+            padding: 15px 35px; background: var(--gradient-gold); color: #000;
+            border: none; border-radius: 50px; font-weight: 700; cursor: pointer;
+            transition: var(--transition); display: inline-flex; align-items: center; gap: 10px;
         }
+        .hero-btn.secondary { background: rgba(30,30,30,0.8); color: var(--primary); border: 2px solid rgba(255,215,0,0.3); }
 
-        .hero-btn.secondary {
-            background: transparent;
-            color: var(--primary);
-            border: 2px solid rgba(255,215,0,0.3);
-        }
-
-        .hero-btn:hover {
-            transform: translateY(-5px);
-        }
-
-        /* Stats Grid */
         .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 35px;
-            margin: 60px 0;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 35px; margin: 60px 0;
         }
-
         .stat-card {
             background: linear-gradient(135deg, rgba(30,30,30,0.9), rgba(26,26,26,0.8));
-            padding: 45px 35px;
-            border-radius: var(--border-radius);
-            text-align: center;
-            border: 1px solid rgba(255,215,0,0.1);
-            transition: var(--transition);
+            padding: 45px 35px; border-radius: var(--border-radius); text-align: center;
+            transition: var(--transition); border: 1px solid rgba(255,215,0,0.1);
+            cursor: pointer; position: relative; overflow: hidden;
         }
-
-        .stat-card:hover {
-            transform: translateY(-15px);
-            border-color: rgba(255,215,0,0.3);
-        }
-
+        .stat-card:hover { transform: translateY(-15px) scale(1.03); border-color: rgba(255,215,0,0.3); }
         .stat-number {
-            font-size: 3.5rem;
-            font-weight: 900;
-            background: var(--gradient-gold);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 15px;
+            font-size: 3.5rem; font-weight: 900; background: var(--gradient-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 15px; line-height: 1;
         }
+        .stat-label { color: #ddd; font-size: 1.1rem; font-weight: 500; }
 
-        /* Quick Links */
-        .quick-links h3 {
-            text-align: center;
-            font-size: 2rem;
-            margin-bottom: 40px;
-            background: var(--gradient-gold);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .links-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 25px;
-        }
-
+        .quick-links { margin-top: 80px; padding-top: 60px; border-top: 1px solid rgba(255,215,0,0.1); }
+        .quick-links h3 { text-align: center; font-size: 2rem; margin-bottom: 40px; background: var(--gradient-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .links-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; }
         .link-card {
-            background: linear-gradient(135deg, rgba(30,30,30,0.8), rgba(26,26,26,0.6));
-            padding: 30px;
-            border-radius: var(--border-radius);
-            text-align: center;
-            border: 1px solid rgba(255,215,0,0.1);
+            background: rgba(30,30,30,0.8); padding: 30px; border-radius: var(--border-radius);
+            text-align: center; transition: var(--transition); border: 1px solid rgba(255,215,0,0.1);
             cursor: pointer;
-            transition: var(--transition);
         }
+        .link-card:hover { transform: translateY(-8px); border-color: rgba(255,215,0,0.3); }
+        .link-icon { font-size: 2.5rem; margin-bottom: 20px; color: var(--primary); }
 
-        .link-card:hover {
-            transform: translateY(-8px);
-            border-color: rgba(255,215,0,0.3);
-        }
-
-        .link-icon {
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-            background: var(--gradient-gold);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        /* About Page */
-        .about-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 50px;
-        }
-
-        @media (max-width: 992px) {
-            .about-content {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .skills-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-top: 40px;
-        }
-
+        /* ===== ABOUT PAGE ===== */
+        .about-content { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; margin-bottom: 50px; }
+        @media (max-width: 992px) { .about-content { grid-template-columns: 1fr; } }
+        .about-text p { font-size: 1.15rem; margin-bottom: 25px; color: var(--gray); line-height: 1.8; }
+        .skills-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px,1fr)); gap: 30px; margin-top: 40px; }
         .skill-category {
-            background: linear-gradient(135deg, rgba(30,30,30,0.8), rgba(26,26,26,0.6));
-            padding: 35px;
-            border-radius: var(--border-radius);
+            background: rgba(30,30,30,0.8); border-radius: var(--border-radius); padding: 35px;
             border: 1px solid rgba(255,215,0,0.1);
         }
-
-        .skill-category h3 {
-            color: var(--primary);
-            margin-bottom: 25px;
-            border-bottom: 2px solid rgba(255,215,0,0.1);
-            padding-bottom: 15px;
-        }
-
-        .skill-items {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
+        .skill-category h3 { font-size: 1.4rem; margin-bottom: 25px; color: var(--primary); border-bottom: 2px solid rgba(255,215,0,0.1); padding-bottom: 15px; }
+        .skill-items { display: flex; flex-wrap: wrap; gap: 12px; }
         .skill-item {
-            background: rgba(255,215,0,0.1);
-            padding: 12px 22px;
-            border-radius: 50px;
-            color: var(--primary);
-            border: 1px solid rgba(255,215,0,0.2);
-            transition: var(--transition);
+            background: rgba(255,215,0,0.1); padding: 12px 22px; border-radius: 50px;
+            font-size: 0.95rem; color: var(--primary); border: 1px solid rgba(255,215,0,0.2);
         }
-
-        .skill-item:hover {
-            transform: translateY(-3px);
-            background: rgba(255,215,0,0.2);
-        }
-
+        .experience-timeline { margin-top: 40px; }
         .experience-item {
-            background: linear-gradient(135deg, rgba(30,30,30,0.8), rgba(26,26,26,0.6));
-            padding: 35px;
-            border-radius: var(--border-radius);
-            margin-bottom: 25px;
-            border-left: 5px solid var(--primary);
+            background: rgba(30,30,30,0.8); border-radius: var(--border-radius); padding: 35px;
+            border: 1px solid rgba(255,215,0,0.1); margin-bottom: 25px; position: relative;
         }
-
-        .experience-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-
-        .experience-title {
-            color: var(--primary);
-            font-size: 1.3rem;
-            font-weight: 700;
-        }
-
-        .experience-date {
-            color: var(--secondary);
-            background: rgba(0,255,255,0.1);
-            padding: 8px 16px;
-            border-radius: 50px;
-        }
-
-        /* Work & Achievements Grid */
-        .work-grid, .achievements-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 35px;
-            margin: 30px 0 50px;
-        }
-
-        .work-card, .achievement-card {
-            background: linear-gradient(135deg, rgba(30,30,30,0.8), rgba(26,26,26,0.6));
-            padding: 35px;
-            border-radius: var(--border-radius);
-            border: 1px solid rgba(255,215,0,0.1);
-            transition: var(--transition);
-            position: relative;
-        }
-
-        .work-card:hover, .achievement-card:hover {
-            transform: translateY(-10px);
-            border-color: rgba(255,215,0,0.3);
-        }
-
-        .work-image-container, .achievement-image-container {
-            width: 100%;
-            height: 250px;
-            border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 25px;
-            background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
-            border: 2px dashed rgba(255,215,0,0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-
-        .work-image, .achievement-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s;
-        }
-
-        .work-image-container:hover .work-image,
-        .achievement-image-container:hover .achievement-image {
-            transform: scale(1.05);
-        }
-
-        .work-image-placeholder, .achievement-image-placeholder {
-            font-size: 4rem;
+        .experience-item::before {
+            content: ''; position: absolute; left: 0; top: 0; width: 5px; height: 100%;
             background: var(--gradient-gold);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
         }
+        .experience-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .experience-title { font-size: 1.3rem; color: var(--primary); font-weight: 700; }
+        .experience-date { color: var(--secondary); font-weight: 600; padding: 8px 16px; background: rgba(0,255,255,0.1); border-radius: 50px; }
+        .experience-content ul { padding-left: 25px; color: var(--gray); }
+        .experience-content li { margin-bottom: 12px; position: relative; }
+        .experience-content li::before { content: '▸'; color: var(--primary); position: absolute; left: -15px; }
 
-        .category-badge {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: var(--gradient-gold);
-            color: #000;
-            padding: 8px 20px;
-            border-radius: 50px;
-            font-weight: 700;
-            z-index: 2;
+        /* ===== ACHIEVEMENTS PAGE ===== */
+        .achievements-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 35px; margin-top: 30px; margin-bottom: 50px;
         }
-
-        /* Projects Grid */
-        .projects-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
-            gap: 35px;
-            margin: 30px 0 50px;
+        .achievement-card {
+            background: rgba(30,30,30,0.8); border-radius: var(--border-radius); padding: 35px;
+            border: 1px solid rgba(255,215,0,0.1); transition: var(--transition);
         }
-
-        .project-card {
-            background: linear-gradient(135deg, rgba(30,30,30,0.8), rgba(26,26,26,0.6));
-            padding: 40px;
-            border-radius: var(--border-radius);
-            border-left: 8px solid var(--primary);
-            transition: var(--transition);
+        .achievement-card:hover { transform: translateY(-10px); border-color: rgba(255,215,0,0.3); }
+        .achievement-image-container {
+            width: 100%; height: 250px; border-radius: 12px; overflow: hidden; margin-bottom: 25px;
+            background: #1a1a1a; display: flex; align-items: center; justify-content: center;
+            border: 2px dashed rgba(255,215,0,0.2); cursor: pointer;
         }
+        .achievement-image { width: 100%; height: 100%; object-fit: cover; }
+        .achievement-card h3 { font-size: 1.4rem; color: var(--primary); margin-bottom: 10px; }
+        .achievement-card .date { color: var(--secondary); font-weight: 600; margin-bottom: 20px; }
+        .achievement-card p { color: var(--gray); line-height: 1.7; }
 
-        .project-card:hover {
-            transform: translateY(-10px);
-        }
-
-        .project-stats {
-            display: flex;
-            justify-content: space-between;
-            background: rgba(30,30,30,0.8);
-            padding: 25px;
-            border-radius: 12px;
-            margin-top: 25px;
-            border: 1px solid rgba(255,215,0,0.2);
-        }
-
-        .stat-value.improvement {
-            background: var(--gradient-gold);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .stat-value.reduction {
-            background: var(--gradient-danger);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        /* Dashboard */
-        .dashboard-periods {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-            gap: 40px;
-        }
-
-        .period-section {
-            background: linear-gradient(135deg, rgba(30,30,30,0.9), rgba(26,26,26,0.7));
-            padding: 40px;
-            border-radius: var(--border-radius);
-            border-left: 8px solid var(--primary);
-        }
-
-        .period-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 25px;
-            margin-top: 30px;
-        }
-
-        .period-stat {
-            text-align: center;
-            padding: 25px;
-            background: rgba(40,40,40,0.8);
-            border-radius: 12px;
-        }
-
-        .period-stat-value.staff {
-            background: var(--gradient-success);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .period-stat-value.drafter {
-            background: var(--gradient-purple);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        /* Chat Room */
+        /* ===== CHATROOM PAGE ===== */
         .chatroom-container {
-            background: linear-gradient(135deg, rgba(30,30,30,0.8), rgba(26,26,26,0.6));
-            border-radius: var(--border-radius);
-            height: 70vh;
-            display: flex;
-            flex-direction: column;
-            border: 1px solid rgba(255,215,0,0.1);
+            background: rgba(30,30,30,0.8); border-radius: var(--border-radius); overflow: hidden;
+            border: 1px solid rgba(255,215,0,0.1); height: 70vh; display: flex; flex-direction: column;
         }
-
-        .chatroom-header {
-            background: var(--gradient-gold);
-            color: #000;
-            padding: 35px;
-            text-align: center;
-        }
-
-        .chatroom-messages {
-            padding: 35px;
-            flex-grow: 1;
-            overflow-y: auto;
-            background: rgba(20,20,20,0.8);
-        }
-
+        .chatroom-header { background: var(--gradient-gold); color: #000; padding: 35px; text-align: center; }
+        .chatroom-header h3 { font-size: 1.8rem; margin-bottom: 10px; font-weight: 800; }
+        .chatroom-messages { padding: 35px; flex-grow: 1; overflow-y: auto; background: rgba(20,20,20,0.8); }
         .message {
-            margin-bottom: 25px;
-            padding: 20px;
-            background: rgba(40,40,40,0.8);
-            border-radius: 20px;
-            max-width: 70%;
-            border: 1px solid rgba(255,215,0,0.1);
+            margin-bottom: 25px; padding: 20px; background: rgba(40,40,40,0.8);
+            border-radius: 20px; max-width: 70%; border: 1px solid rgba(255,215,0,0.1);
         }
-
-        .message.user {
-            margin-left: auto;
-            background: var(--gradient-gold);
-            color: #000;
-        }
-
+        .message.user { margin-left: auto; background: var(--gradient-gold); color: #000; }
+        .message-info { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.9rem; opacity: 0.8; }
+        .message-content { font-size: 1.05rem; line-height: 1.5; }
         .chatroom-input {
-            padding: 25px;
-            background: rgba(30,30,30,0.8);
-            display: flex;
-            gap: 20px;
+            padding: 25px; background: rgba(30,30,30,0.8); display: flex; gap: 20px;
             border-top: 1px solid rgba(255,255,255,0.05);
         }
-
         .chatroom-input input {
-            flex: 1;
-            padding: 16px 25px;
-            background: #0f0f0f;
-            border: 2px solid rgba(255,215,0,0.2);
-            border-radius: 50px;
-            color: var(--light);
+            flex: 1; padding: 16px 25px; background: #0f0f0f;
+            border: 2px solid rgba(255,215,0,0.2); border-radius: 50px; color: var(--light);
         }
-
-        .chatroom-input input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
         .chatroom-input button {
-            background: var(--gradient-gold);
-            color: #000;
-            border: none;
-            border-radius: 50px;
-            padding: 16px 35px;
-            font-weight: 700;
-            cursor: pointer;
+            background: var(--gradient-gold); color: #000; border: none;
+            border-radius: 50px; padding: 16px 35px; font-weight: 700; cursor: pointer;
         }
 
-        /* Contact Page */
-        .contact-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 50px;
-        }
-
-        @media (max-width: 992px) {
-            .contact-content {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .contact-info {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 25px;
-        }
-
+        /* ===== CONTACT PAGE ===== */
+        .contact-content { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; }
+        @media (max-width: 992px) { .contact-content { grid-template-columns: 1fr; } }
+        .contact-info { display: grid; grid-template-columns: repeat(2,1fr); gap: 25px; }
         .contact-card {
-            background: linear-gradient(135deg, rgba(30,30,30,0.8), rgba(26,26,26,0.6));
-            padding: 30px;
-            border-radius: var(--border-radius);
-            text-align: center;
-            transition: var(--transition);
+            background: rgba(30,30,30,0.8); border-radius: var(--border-radius); padding: 30px;
+            text-align: center; border: 1px solid rgba(255,215,0,0.1); transition: var(--transition);
         }
-
-        .contact-card:hover {
-            transform: translateY(-8px);
-        }
-
-        .contact-icon {
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-            background: var(--gradient-gold);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
+        .contact-card:hover { transform: translateY(-8px); border-color: rgba(255,215,0,0.3); }
+        .contact-icon { font-size: 2.5rem; margin-bottom: 20px; color: var(--primary); }
+        .contact-card h3 { font-size: 1.2rem; margin-bottom: 15px; color: var(--primary); }
+        .contact-card p { color: var(--gray); }
         .contact-form {
-            background: linear-gradient(135deg, rgba(30,30,30,0.8), rgba(26,26,26,0.6));
-            padding: 40px;
-            border-radius: var(--border-radius);
+            background: rgba(30,30,30,0.8); border-radius: var(--border-radius); padding: 40px;
+            border: 1px solid rgba(255,215,0,0.1);
         }
-
-        .form-group {
-            margin-bottom: 25px;
+        .contact-form h3 { margin-bottom: 35px; color: var(--primary); font-size: 1.8rem; }
+        .form-group { margin-bottom: 25px; }
+        .form-group label { display: block; margin-bottom: 12px; font-weight: 600; }
+        .form-group input, .form-group textarea {
+            width: 100%; padding: 16px 20px; background: #0f0f0f;
+            border: 2px solid rgba(255,215,0,0.2); border-radius: 12px; color: var(--light);
         }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 12px;
-            font-weight: 600;
-        }
-
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 16px 20px;
-            background: #0f0f0f;
-            border: 2px solid rgba(255,215,0,0.2);
-            border-radius: 12px;
-            color: var(--light);
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
         .submit-btn {
-            background: var(--gradient-gold);
-            color: #000;
-            border: none;
-            border-radius: 50px;
-            padding: 18px 35px;
-            font-weight: 700;
-            width: 100%;
-            cursor: pointer;
+            background: var(--gradient-gold); color: #000; border: none;
+            border-radius: 50px; padding: 18px 35px; font-weight: 700; cursor: pointer;
+            width: 100%; font-size: 1.1rem;
         }
 
-        /* Edit Mode */
+        /* ===== EDIT MODE STYLES ===== */
         .admin-mode .editable {
-            position: relative;
-            border: 2px dashed rgba(255,215,0,0.3);
-            padding: 15px;
-            margin: 8px 0;
-            border-radius: 10px;
+            position: relative; border: 2px dashed rgba(255,215,0,0.3);
+            padding: 15px; margin: 8px 0; border-radius: 10px;
             background: rgba(255,215,0,0.03);
         }
-
         .edit-btn, .delete-btn, .add-btn {
-            padding: 8px 15px;
-            border-radius: 8px;
-            font-weight: 700;
-            cursor: pointer;
-            display: none;
-            margin: 5px;
-            border: none;
+            display: none; margin: 5px; padding: 8px 15px; border-radius: 8px;
+            font-weight: 700; font-size: 0.85rem; cursor: pointer;
         }
+        .admin-mode .edit-btn, .admin-mode .delete-btn, .admin-mode .add-btn { display: inline-block; }
+        .edit-btn { background: var(--gradient-gold); color: #000; }
+        .delete-btn { background: var(--gradient-danger); color: #fff; }
+        .add-btn { background: var(--gradient-success); color: #fff; padding: 15px 25px; margin: 25px 0; }
 
-        .edit-btn {
-            background: var(--gradient-gold);
-            color: #000;
-        }
-
-        .delete-btn {
-            background: var(--gradient-danger);
-            color: #fff;
-        }
-
-        .add-btn {
-            background: var(--gradient-success);
-            color: #fff;
-            padding: 15px 25px;
-        }
-
-        .admin-mode .edit-btn,
-        .admin-mode .delete-btn,
-        .admin-mode .add-btn {
-            display: inline-block;
-        }
-
-        /* Modal */
+        /* ===== MODAL ===== */
         .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.95);
-            backdrop-filter: blur(10px);
-            z-index: 2000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); backdrop-filter: blur(10px);
+            z-index: 2000; display: none; align-items: center; justify-content: center;
         }
-
-        .modal.active {
-            display: flex;
-        }
-
+        .modal.active { display: flex; }
         .modal-content {
-            background: linear-gradient(135deg, rgba(30,30,30,0.98), rgba(26,26,26,0.95));
-            border-radius: var(--border-radius);
-            padding: 50px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 90vh;
-            overflow-y: auto;
-            border: 1px solid rgba(255,215,0,0.3);
-            position: relative;
+            background: rgba(30,30,30,0.98); border-radius: var(--border-radius); padding: 50px;
+            width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto;
+            border: 1px solid rgba(255,215,0,0.3); position: relative;
         }
-
         .modal-close {
-            position: absolute;
-            top: 25px;
-            right: 25px;
-            background: rgba(255,215,0,0.1);
-            color: var(--primary);
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            font-size: 1.2rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            position: absolute; top: 25px; right: 25px; background: rgba(255,215,0,0.1);
+            color: var(--primary); border: none; border-radius: 50%; width: 40px; height: 40px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
 
-        /* Loading & Notification */
+        /* ===== LOADING & NOTIFICATION ===== */
         .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.85);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 2002;
-            flex-direction: column;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center;
+            z-index: 2001; flex-direction: column;
         }
-
-        .loading-overlay.active {
-            display: flex;
-        }
-
+        .loading-overlay.active { display: flex; }
         .loading-spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid rgba(255,215,0,0.3);
-            border-top: 4px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
+            width: 60px; height: 60px; border: 4px solid rgba(255,215,0,0.3);
+            border-top: 4px solid var(--primary); border-radius: 50%;
+            animation: spin 1s linear infinite; margin-bottom: 20px;
         }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .notification {
-            position: fixed;
-            bottom: 40px;
-            right: 40px;
-            background: var(--gradient-gold);
-            color: #000;
-            padding: 20px 30px;
-            border-radius: var(--border-radius);
-            z-index: 2001;
-            display: none;
-            animation: slideInRight 0.3s;
+            position: fixed; bottom: 40px; right: 40px; background: var(--gradient-gold);
+            color: #000; padding: 20px 30px; border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow); z-index: 2002; display: none;
+            max-width: 350px; font-weight: 700;
         }
 
-        @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+        /* ===== EFFECTS (Rain & Starfall) ===== */
+        .effect-toggle {
+            position: fixed; bottom: 100px; right: 40px; background: var(--gradient-gold);
+            color: #000; border: none; border-radius: 50px; padding: 12px 25px;
+            font-weight: 700; cursor: pointer; z-index: 999; display: none;
+            align-items: center; gap: 10px; box-shadow: 0 8px 25px rgba(255,215,0,0.3);
         }
-
-        /* Effects */
         .rain-container, .starfall-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
-            display: none;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 50; display: none;
         }
-
         .rain-drop {
-            position: absolute;
-            top: -10px;
-            width: 2px;
-            height: 20px;
-            background: linear-gradient(transparent, var(--primary));
+            position: absolute; width: 2px; height: 15px; background: rgba(255,255,255,0.3);
             animation: rain linear infinite;
         }
-
-        @keyframes rain {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(100vh); }
-        }
-
+        @keyframes rain { 0% { transform: translateY(-100%); } 100% { transform: translateY(100vh); } }
         .star {
-            position: absolute;
-            top: -10px;
-            width: 3px;
-            height: 3px;
-            background: #fff;
-            border-radius: 50%;
-            box-shadow: 0 0 5px #fff;
+            position: absolute; width: 3px; height: 3px; background: #fff; border-radius: 50%;
             animation: starfall linear infinite;
         }
-
-        @keyframes starfall {
-            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
-        }
-
-        /* Mobile Menu */
-        .mobile-menu-toggle {
-            display: none;
-            position: fixed;
-            top: 25px;
-            right: 25px;
-            background: var(--gradient-gold);
-            color: #000;
-            border: none;
-            border-radius: 12px;
-            padding: 15px;
-            font-size: 1.4rem;
-            cursor: pointer;
-            z-index: 101;
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-                width: 100%;
-                max-width: 320px;
-            }
-
-            .sidebar.active {
-                transform: translateX(0);
-            }
-
-            .main-content {
-                margin-left: 0;
-            }
-
-            .mobile-menu-toggle {
-                display: block;
-            }
-
-            .content-header {
-                padding: 20px;
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .content-body {
-                padding: 20px;
-            }
-
-            .hero-title {
-                font-size: 2.5rem;
-            }
-
-            .hero-actions {
-                flex-direction: column;
-            }
-
-            .stats-grid,
-            .work-grid,
-            .achievements-grid,
-            .projects-grid,
-            .dashboard-periods {
-                grid-template-columns: 1fr;
-            }
-
-            .contact-info {
-                grid-template-columns: 1fr;
-            }
-
-            .floating-add-btn {
-                top: auto;
-                bottom: 30px;
-                right: 20px;
-            }
-
-            .effect-toggle {
-                bottom: 80px;
-                right: 20px;
-            }
-        }
+        @keyframes starfall { 0% { transform: translateY(-100%) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(360deg); opacity: 0; } }
     </style>
 </head>
 <body>
-    <button class="mobile-menu-toggle" id="mobileMenuToggle">
-        <i class="fas fa-bars"></i>
-    </button>
-    
-    <button class="floating-add-btn" id="floatingAddBtn">
-        <i class="fas fa-plus-circle"></i> Tambah Work
-    </button>
-
-    <button class="effect-toggle" id="effectToggle">
-        <i class="fas fa-magic" id="effectIcon"></i>
-        <span id="effectText">Aktifkan Efek</span>
-    </button>
-
+    <button class="mobile-menu-toggle" id="mobileMenuToggle"><i class="fas fa-bars"></i></button>
+    <button class="effect-toggle" id="effectToggle"><i class="fas fa-magic" id="effectIcon"></i> <span id="effectText">Aktifkan Efek</span></button>
     <div class="rain-container" id="rainContainer"></div>
     <div class="starfall-container" id="starfallContainer"></div>
 
@@ -1138,13 +415,9 @@
                 <div class="profile-section">
                     <div class="profile-img-container" id="profileImgContainer">
                         <div class="profile-img" id="profileImg">
-                            <div class="profile-img-placeholder">
-                                <i class="fas fa-user-tie" id="profileIcon"></i>
-                            </div>
+                            <div class="profile-img-placeholder"><i class="fas fa-user-tie" id="profileIcon"></i></div>
                         </div>
-                        <button class="profile-img-upload" id="profileUploadBtn" title="Upload Foto Profile">
-                            <i class="fas fa-camera"></i>
-                        </button>
+                        <button class="profile-img-upload" id="profileUploadBtn"><i class="fas fa-camera"></i></button>
                     </div>
                     <div class="profile-info">
                         <h2>Arya Savariansah</h2>
@@ -1152,160 +425,78 @@
                     </div>
                 </div>
             </div>
-            
             <ul class="nav-menu">
                 <li><a href="#home" class="nav-link active" data-page="home"><i class="fas fa-home"></i> Home</a></li>
                 <li><a href="#about" class="nav-link" data-page="about"><i class="fas fa-user"></i> About Me</a></li>
-                <li><a href="#work" class="nav-link" data-page="work"><i class="fas fa-briefcase"></i> Work</a></li>
                 <li><a href="#achievements" class="nav-link" data-page="achievements"><i class="fas fa-trophy"></i> Achievements</a></li>
-                <li><a href="#projects" class="nav-link" data-page="projects"><i class="fas fa-project-diagram"></i> Projects</a></li>
-                <li><a href="#dashboard" class="nav-link" data-page="dashboard"><i class="fas fa-chart-line"></i> Dashboard</a></li>
                 <li><a href="#chatroom" class="nav-link" data-page="chatroom"><i class="fas fa-comments"></i> Chat Room</a></li>
                 <li><a href="#contact" class="nav-link" data-page="contact"><i class="fas fa-envelope"></i> Contact</a></li>
             </ul>
-            
             <div class="admin-section">
-                <button class="admin-toggle" id="adminToggle">
-                    <i class="fas fa-user-lock"></i> Login Admin
-                </button>
-                
+                <button class="admin-toggle" id="adminToggle"><i class="fas fa-user-lock"></i> Login Admin</button>
                 <div class="admin-panel" id="adminPanel">
                     <h3>Login Admin</h3>
                     <input type="password" id="adminPassword" class="admin-input" placeholder="Password Admin">
                     <button class="admin-btn" id="adminLogin">Login</button>
-                    
                     <div id="adminControls" style="display: none;">
                         <h3>Edit Mode</h3>
                         <button class="admin-btn" id="toggleEditMode">Aktifkan Edit Mode</button>
                         <button class="admin-btn" id="saveAllData">Simpan Semua Data</button>
                         <button class="admin-btn" id="adminLogout">Logout</button>
-                        <button class="admin-btn" id="resetDataBtn">Reset Data</button>
+                        <button class="admin-btn" id="resetDataBtn">Reset/Import Data</button>
                     </div>
                 </div>
             </div>
-            
-            <div class="sidebar-footer">
-                <p>© 2026 Arya Savariansah</p>
-            </div>
         </aside>
-        
+
         <main class="main-content" id="mainContent">
             <div class="content-header">
                 <div class="page-title">
                     <h2 id="currentPageTitle">Home</h2>
                     <p id="currentPageDesc">Selamat datang di portfolio Arya Savariansah</p>
                 </div>
-                <div class="edit-status" id="editStatus">
-                    <i class="fas fa-edit"></i> Edit Mode Aktif
-                </div>
+                <div class="edit-status" id="editStatus"><i class="fas fa-edit"></i> Edit Mode Aktif</div>
             </div>
-            
+
             <div class="content-body" id="contentBody">
                 <!-- Home Page -->
                 <div class="page active" id="homePage">
                     <div class="home-hero">
                         <div class="hero-content">
-                            <div class="hero-badge editable">
-                                <span id="homeBadge">✨ Lulusan SMK Teknik Permesinan ✨</span>
-                                <button class="edit-btn" data-edit="homeBadge">Edit</button>
-                            </div>
-                            
+                            <div class="hero-badge editable" id="homeBadge">✨ Lulusan SMK Teknik Permesinan ✨</div>
                             <h1 class="hero-title editable" id="homeTitle">ARYA SAVARIANSAH</h1>
-                            <button class="edit-btn" data-edit="homeTitle">Edit</button>
-                            
-                            <div class="hero-subtitle editable" id="homeSubtitle">
-                                <i class="fas fa-star" style="color: var(--primary);"></i>
-                                Spesialis Manufaktur & Produksi
-                                <i class="fas fa-star" style="color: var(--primary);"></i>
-                            </div>
-                            <button class="edit-btn" data-edit="homeSubtitle">Edit</button>
-                            
-                            <p class="hero-description editable" id="homeDescription">
-                                Lulusan SMK Teknik Permesinan dengan pengalaman di bidang manufaktur dan produksi. 
-                                Terbiasa menangani perencanaan produksi, quality control, manajemen stok & distribusi, 
-                                hingga mechanical drafting.
-                            </p>
-                            <button class="edit-btn" data-edit="homeDescription">Edit</button>
-                            
+                            <div class="hero-subtitle editable" id="homeSubtitle"><i class="fas fa-star" style="color: var(--primary); margin-right: 10px;"></i> Spesialis Manufaktur & Produksi <i class="fas fa-star" style="color: var(--primary); margin-left: 10px;"></i></div>
+                            <p class="hero-description editable" id="homeDescription">Lulusan SMK Teknik Permesinan dengan pengalaman di bidang manufaktur dan produksi. Terbiasa menangani perencanaan produksi, quality control, manajemen stok & distribusi, hingga mechanical drafting.</p>
                             <div class="hero-actions">
-                                <button class="hero-btn" onclick="changePage('about')">
-                                    <i class="fas fa-user"></i> Lihat Profil
-                                </button>
-                                <button class="hero-btn secondary" onclick="changePage('contact')">
-                                    <i class="fas fa-envelope"></i> Hubungi Saya
-                                </button>
+                                <button class="hero-btn" onclick="changePage('about')"><i class="fas fa-user"></i> Lihat Profil</button>
+                                <button class="hero-btn secondary" onclick="changePage('contact')"><i class="fas fa-envelope"></i> Hubungi</button>
                             </div>
                         </div>
                     </div>
-                    
                     <div class="stats-grid">
-                        <div class="stat-card editable">
-                            <div class="stat-number" id="stat1Number">15%</div>
-                            <div class="stat-label" id="stat1Label">Pengurangan Waktu Setup</div>
-                            <button class="edit-btn" data-edit="stat1Number">Edit</button>
-                            <button class="edit-btn" data-edit="stat1Label">Edit</button>
-                        </div>
-                        <div class="stat-card editable">
-                            <div class="stat-number" id="stat2Number">60%</div>
-                            <div class="stat-label" id="stat2Label">Penurunan Reject Material</div>
-                            <button class="edit-btn" data-edit="stat2Number">Edit</button>
-                            <button class="edit-btn" data-edit="stat2Label">Edit</button>
-                        </div>
-                        <div class="stat-card editable">
-                            <div class="stat-number" id="stat3Number">20%</div>
-                            <div class="stat-label" id="stat3Label">Peningkatan Efisiensi</div>
-                            <button class="edit-btn" data-edit="stat3Number">Edit</button>
-                            <button class="edit-btn" data-edit="stat3Label">Edit</button>
-                        </div>
-                        <div class="stat-card editable">
-                            <div class="stat-number" id="stat4Number">67%</div>
-                            <div class="stat-label" id="stat4Label">Pengurangan Lead Time</div>
-                            <button class="edit-btn" data-edit="stat4Number">Edit</button>
-                            <button class="edit-btn" data-edit="stat4Label">Edit</button>
-                        </div>
+                        <div class="stat-card editable" id="stat1"><div class="stat-number" id="stat1Number">15%</div><div class="stat-label" id="stat1Label">Pengurangan Waktu Setup</div></div>
+                        <div class="stat-card editable" id="stat2"><div class="stat-number" id="stat2Number">60%</div><div class="stat-label" id="stat2Label">Penurunan Reject Material</div></div>
+                        <div class="stat-card editable" id="stat3"><div class="stat-number" id="stat3Number">20%</div><div class="stat-label" id="stat3Label">Peningkatan Efisiensi</div></div>
+                        <div class="stat-card editable" id="stat4"><div class="stat-number" id="stat4Number">67%</div><div class="stat-label" id="stat4Label">Pengurangan Lead Time</div></div>
                     </div>
-                    
                     <div class="quick-links">
                         <h3>Akses Cepat</h3>
                         <div class="links-grid">
-                            <div class="link-card" onclick="changePage('work')">
-                                <div class="link-icon"><i class="fas fa-briefcase"></i></div>
-                                <h4>Work</h4>
-                                <p>Dokumentasi pekerjaan</p>
-                            </div>
-                            <div class="link-card" onclick="changePage('projects')">
-                                <div class="link-icon"><i class="fas fa-project-diagram"></i></div>
-                                <h4>Projects</h4>
-                                <p>Proyek terbaik</p>
-                            </div>
-                            <div class="link-card" onclick="changePage('achievements')">
-                                <div class="link-icon"><i class="fas fa-trophy"></i></div>
-                                <h4>Achievements</h4>
-                                <p>Sertifikat & pencapaian</p>
-                            </div>
-                            <div class="link-card" onclick="changePage('contact')">
-                                <div class="link-icon"><i class="fas fa-envelope"></i></div>
-                                <h4>Contact</h4>
-                                <p>Hubungi saya</p>
-                            </div>
+                            <div class="link-card" onclick="changePage('about')"><div class="link-icon"><i class="fas fa-user"></i></div><h4>About</h4><p>Lihat profil dan keahlian</p></div>
+                            <div class="link-card" onclick="changePage('achievements')"><div class="link-icon"><i class="fas fa-trophy"></i></div><h4>Achievements</h4><p>Sertifikat & pencapaian</p></div>
+                            <div class="link-card" onclick="changePage('chatroom')"><div class="link-icon"><i class="fas fa-comments"></i></div><h4>Chat</h4><p>Diskusi & bertanya</p></div>
+                            <div class="link-card" onclick="changePage('contact')"><div class="link-icon"><i class="fas fa-envelope"></i></div><h4>Contact</h4><p>Hubungi saya</p></div>
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- About Me Page -->
                 <div class="page" id="aboutPage">
-                    <h2 style="margin-bottom:40px; font-size:2.5rem; background:var(--gradient-gold); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Tentang Saya</h2>
+                    <h2 style="margin-bottom:40px;font-size:2.5rem;background:var(--gradient-gold);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Tentang Saya</h2>
                     <div class="about-content">
                         <div>
-                            <div class="editable" id="aboutText1">
-                                <p>Lulusan SMK Teknik Permesinan dengan pengalaman di bidang manufaktur dan produksi.</p>
-                            </div>
-                            <button class="edit-btn" data-edit="aboutText1">Edit</button>
-                            <div class="editable" id="aboutText2">
-                                <p>Memiliki kemampuan dalam meningkatkan efisiensi produksi, menurunkan reject, serta mendukung proses manufaktur melalui desain teknis.</p>
-                            </div>
-                            <button class="edit-btn" data-edit="aboutText2">Edit</button>
-                            
+                            <div class="editable" id="aboutText1"><p>Lulusan SMK Teknik Permesinan dengan pengalaman di bidang manufaktur dan produksi. Terbiasa menangani perencanaan produksi, quality control, manajemen stok & distribusi, hingga mechanical drafting.</p></div>
+                            <div class="editable" id="aboutText2"><p>Memiliki kemampuan dalam meningkatkan efisiensi produksi, menurunkan tingkat reject, serta mendukung kelancaran proses manufaktur melalui desain teknis dan perencanaan yang sistematis.</p></div>
                             <div class="skills-grid">
                                 <div class="skill-category editable" id="technicalSkills">
                                     <h3>Keahlian Teknis</h3>
@@ -1313,14 +504,13 @@
                                         <div class="skill-item">AutoCAD</div>
                                         <div class="skill-item">SolidWorks</div>
                                         <div class="skill-item">Gambar Teknik</div>
-                                        <div class="skill-item">Bubut, Milling</div>
+                                        <div class="skill-item">Bubut & Milling</div>
                                         <div class="skill-item">Production Planning</div>
                                         <div class="skill-item">Quality Control</div>
                                         <div class="skill-item">Preventive Maintenance</div>
                                         <div class="skill-item">Microsoft Office</div>
                                         <div class="skill-item">Basic ERP</div>
                                     </div>
-                                    <button class="add-btn" data-add="technicalSkills">+ Tambah Skill</button>
                                 </div>
                                 <div class="skill-category editable" id="personalSkills">
                                     <h3>Keahlian Personal</h3>
@@ -1330,161 +520,68 @@
                                         <div class="skill-item">Manajemen Waktu</div>
                                         <div class="skill-item">Detail-Oriented</div>
                                         <div class="skill-item">Disiplin</div>
+                                        <div class="skill-item">Adaptif</div>
                                         <div class="skill-item">Komunikasi Efektif</div>
                                     </div>
-                                    <button class="add-btn" data-add="personalSkills">+ Tambah Skill</button>
                                 </div>
                             </div>
                         </div>
-                        
                         <div>
-                            <h3 style="margin-bottom:30px; color:var(--primary);">Pengalaman Kerja</h3>
+                            <h3 style="margin-bottom:30px;color:var(--primary);">Pengalaman Kerja</h3>
                             <div class="experience-timeline">
                                 <div class="experience-item editable" id="experience1">
-                                    <div class="experience-header">
-                                        <h3 class="experience-title">Mechanical Drafter Manufacturing</h3>
-                                        <div class="experience-date">Jun 2025 - Sekarang</div>
-                                    </div>
-                                    <div class="experience-content">
-                                        <ul>
-                                            <li>Sistem pendataan molding untuk preventive maintenance</li>
-                                            <li>Standarisasi variasi molding</li>
-                                            <li>Mengurangi waktu setup 15%</li>
-                                        </ul>
-                                    </div>
-                                    <button class="edit-btn" data-edit="experience1">Edit</button>
-                                    <button class="delete-btn" data-delete="experience1" data-type="experience">Hapus</button>
+                                    <div class="experience-header"><h3 class="experience-title">Mechanical Drafter Manufacturing</h3><div class="experience-date">Jun 2025 - Sekarang</div></div>
+                                    <div class="experience-content"><ul><li>Membuat sistem pendataan molding beserta lifetime usage</li><li>Menyatukan variasi pengaturan molding menjadi 1 standar</li><li>Mempercepat setup operator bubut dengan drawing detail</li></ul></div>
                                 </div>
                                 <div class="experience-item editable" id="experience2">
-                                    <div class="experience-header">
-                                        <h3 class="experience-title">Staff Produksi</h3>
-                                        <div class="experience-date">Jun 2024 - Jun 2025</div>
-                                    </div>
-                                    <div class="experience-content">
-                                        <ul>
-                                            <li>Menurunkan overconsumption material</li>
-                                            <li>Monitoring bahan, turunkan non-conformance</li>
-                                            <li>Optimasi WIP dari 2 ton ke 724,5 kg</li>
-                                            <li>Menurunkan reject mesin spiral 8% → 3%</li>
-                                        </ul>
-                                    </div>
-                                    <button class="edit-btn" data-edit="experience2">Edit</button>
-                                    <button class="delete-btn" data-delete="experience2" data-type="experience">Hapus</button>
+                                    <div class="experience-header"><h3 class="experience-title">Staff Produksi</h3><div class="experience-date">Jun 2024 - Jun 2025</div></div>
+                                    <div class="experience-content"><ul><li>Menurunkan overconsumption material</li><li>Monitoring bahan dan non-conformance</li><li>Meningkatkan produktivitas WIP dari 2 Ton menjadi 724,5 kg</li><li>Menurunkan reject mesin spiral dari 8% menjadi 3%</li></ul></div>
                                 </div>
                             </div>
-                            <button class="add-btn" data-add="experience">+ Tambah Pengalaman</button>
                         </div>
                     </div>
                 </div>
-                
-                <!-- Work Page -->
-                <div class="page" id="workPage">
-                    <h2 style="margin-bottom:40px; font-size:2.5rem; background:var(--gradient-gold); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Work</h2>
-                    <div class="work-grid" id="workContainer"></div>
-                    <button class="add-btn" data-add="work" id="addWorkBtn">+ Tambah Work</button>
-                </div>
-                
+
                 <!-- Achievements Page -->
                 <div class="page" id="achievementsPage">
-                    <h2 style="margin-bottom:40px; font-size:2.5rem; background:var(--gradient-gold); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Pencapaian & Sertifikat</h2>
-                    <div class="achievements-grid" id="achievementsContainer"></div>
+                    <h2 style="margin-bottom:40px;font-size:2.5rem;background:var(--gradient-gold);-webkit-background-clip:text;">Pencapaian & Sertifikat</h2>
+                    <div class="achievements-grid" id="achievementsContainer">
+                        <!-- akan diisi JS -->
+                    </div>
                     <button class="add-btn" data-add="achievement">+ Tambah Pencapaian</button>
                 </div>
-                
-                <!-- Projects Page -->
-                <div class="page" id="projectsPage">
-                    <h2 style="margin-bottom:40px; font-size:2.5rem; background:var(--gradient-gold); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Proyek & Portofolio</h2>
-                    <div class="projects-grid" id="projectsContainer">
-                        <!-- projects from JS -->
-                    </div>
-                    <button class="add-btn" data-add="project">+ Tambah Proyek</button>
-                </div>
-                
-                <!-- Dashboard Page -->
-                <div class="page" id="dashboardPage">
-                    <h2 style="margin-bottom:40px; font-size:2.5rem; background:var(--gradient-gold); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Dashboard Statistik</h2>
-                    <div class="dashboard-periods" id="dashboardContainer">
-                        <!-- will be filled by JS -->
-                    </div>
-                </div>
-                
+
                 <!-- Chatroom Page -->
                 <div class="page" id="chatroomPage">
-                    <h2 style="margin-bottom:40px; font-size:2.5rem; background:var(--gradient-gold); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-align:center;">Chat Room</h2>
+                    <h2 style="margin-bottom:40px;font-size:2.5rem;background:var(--gradient-gold);-webkit-background-clip:text;text-align:center;">Chat Room</h2>
+                    <p style="text-align:center;margin-bottom:50px;color:var(--gray);">Share your thoughts, questions, or anything else!</p>
                     <div class="chatroom-container">
-                        <div class="chatroom-header">
-                            <h3>Live Chat Room</h3>
-                        </div>
-                        <div class="chatroom-messages" id="chatMessages">
-                            <div class="message">
-                                <div class="message-info">
-                                    <span>Vernita Chesnauer</span>
-                                    <span>01/04/2025, 14:00</span>
-                                </div>
-                                <div class="message-content">Love the design!</div>
-                            </div>
-                            <div class="message">
-                                <div class="message-info">
-                                    <span>Rufa Resto Ramadhani</span>
-                                    <span>01/04/2025, 14:37</span>
-                                </div>
-                                <div class="message-content">Awesome portfolio!</div>
-                            </div>
-                        </div>
+                        <div class="chatroom-header"><h3>Live Chat Room</h3><p>Join the conversation</p></div>
+                        <div class="chatroom-messages" id="chatMessages"></div>
                         <div class="chatroom-input">
                             <input type="text" id="chatInput" placeholder="Type your message...">
                             <button id="sendMessage">Send</button>
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Contact Page -->
                 <div class="page" id="contactPage">
-                    <h2 style="margin-bottom:40px; font-size:2.5rem; background:var(--gradient-gold); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">Hubungi Saya</h2>
+                    <h2 style="margin-bottom:40px;font-size:2.5rem;background:var(--gradient-gold);-webkit-background-clip:text;">Hubungi Saya</h2>
                     <div class="contact-content">
                         <div class="contact-info">
-                            <div class="contact-card editable" id="contactEmail">
-                                <div class="contact-icon"><i class="fas fa-envelope"></i></div>
-                                <h3>Email</h3>
-                                <p>aryasavarinasah@gmail.com</p>
-                                <button class="edit-btn" data-edit="contactEmail">Edit</button>
-                            </div>
-                            <div class="contact-card editable" id="contactPhone">
-                                <div class="contact-icon"><i class="fas fa-phone"></i></div>
-                                <h3>Telepon</h3>
-                                <p>089520336532</p>
-                                <button class="edit-btn" data-edit="contactPhone">Edit</button>
-                            </div>
-                            <div class="contact-card editable" id="contactLocation">
-                                <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
-                                <h3>Lokasi</h3>
-                                <p>Kosambi, Indonesia</p>
-                                <button class="edit-btn" data-edit="contactLocation">Edit</button>
-                            </div>
-                            <div class="contact-card editable" id="contactLinkedin">
-                                <div class="contact-icon"><i class="fab fa-linkedin"></i></div>
-                                <h3>LinkedIn</h3>
-                                <p>linkedin.com/in/arya-savariansah</p>
-                                <button class="edit-btn" data-edit="contactLinkedin">Edit</button>
-                            </div>
+                            <div class="contact-card editable" id="contactEmail"><div class="contact-icon"><i class="fas fa-envelope"></i></div><h3>Email</h3><p>aryasavarinasah@gmail.com</p></div>
+                            <div class="contact-card editable" id="contactPhone"><div class="contact-icon"><i class="fas fa-phone"></i></div><h3>Telepon</h3><p>089520336532</p></div>
+                            <div class="contact-card editable" id="contactLocation"><div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div><h3>Lokasi</h3><p>Kosambi, Indonesia</p></div>
+                            <div class="contact-card editable" id="contactLinkedin"><div class="contact-icon"><i class="fab fa-linkedin"></i></div><h3>LinkedIn</h3><p>linkedin.com/in/arya-savariansah</p></div>
                         </div>
-                        
                         <div class="contact-form">
                             <h3>Kirim Pesan</h3>
                             <form id="contactForm">
-                                <div class="form-group">
-                                    <label>Nama</label>
-                                    <input type="text" id="name" required>
-                                </div>
-                                <div class="form-group">
-                                    <label>Email</label>
-                                    <input type="email" id="email" required>
-                                </div>
-                                <div class="form-group">
-                                    <label>Pesan</label>
-                                    <textarea id="message" required></textarea>
-                                </div>
-                                <button type="submit" class="submit-btn">Kirim</button>
+                                <div class="form-group"><label for="name">Nama</label><input type="text" id="name" required></div>
+                                <div class="form-group"><label for="email">Email</label><input type="email" id="email" required></div>
+                                <div class="form-group"><label for="message">Pesan</label><textarea id="message" required></textarea></div>
+                                <button type="submit" class="submit-btn">Kirim Pesan</button>
                             </form>
                         </div>
                     </div>
@@ -1492,94 +589,40 @@
             </div>
         </main>
     </div>
-    
-    <!-- Modals -->
+
+    <!-- Modal untuk Upload Foto -->
     <div class="modal" id="imageUploadModal">
         <div class="modal-content">
             <button class="modal-close" id="closeImageModal"><i class="fas fa-times"></i></button>
-            <div class="modal-header">
-                <h2 class="modal-title" id="modalTitle">Upload Foto</h2>
-            </div>
-            <div class="form-group">
-                <input type="file" id="imageInput" accept="image/*" class="admin-input">
-            </div>
-            <div class="image-preview" id="imagePreview" style="display:none;">
-                <img id="previewImage" src="" style="max-width:100%; border-radius:10px;">
-            </div>
-            <div style="display:flex; gap:15px; margin-top:30px;">
-                <button class="admin-btn" id="saveImageBtn">Simpan</button>
+            <div class="modal-header"><h2 class="modal-title" id="modalTitle">Upload Foto</h2><p class="modal-subtitle">Pilih foto yang ingin diupload</p></div>
+            <div class="form-group"><input type="file" id="imageInput" accept="image/*" class="admin-input"></div>
+            <div class="image-preview" id="imagePreview"><img id="previewImage" src="" alt="Preview" style="max-width:100%;"></div>
+            <div class="modal-buttons" style="display:flex;gap:15px;margin-top:30px;">
+                <button class="admin-btn" id="saveImageBtn">Simpan Foto</button>
                 <button class="admin-btn" style="background:var(--gradient-dark);" id="cancelImageBtn">Batal</button>
-                <button class="admin-btn" style="background:var(--gradient-danger); display:none;" id="removeImageBtn">Hapus</button>
+                <button class="admin-btn" style="background:var(--gradient-danger);display:none;" id="removeImageBtn">Hapus Foto</button>
             </div>
         </div>
     </div>
 
-    <div class="modal" id="workUploadModal">
-        <div class="modal-content">
-            <button class="modal-close" id="closeWorkModal"><i class="fas fa-times"></i></button>
-            <div class="modal-header">
-                <h2 class="modal-title" id="workModalTitle">Tambah Work</h2>
-            </div>
-            <form id="workUploadForm">
-                <div class="form-group">
-                    <label>Judul</label>
-                    <input type="text" id="workTitle" class="admin-input" required>
-                </div>
-                <div class="form-group">
-                    <label>Tanggal (DD/MM/YYYY)</label>
-                    <input type="text" id="workDate" class="admin-input" required>
-                </div>
-                <div class="form-group">
-                    <label>Kategori</label>
-                    <select id="workCategory" class="admin-input" required>
-                        <option value="">Pilih</option>
-                        <option value="Mechanical Drafting">Mechanical Drafting</option>
-                        <option value="Production Work">Production Work</option>
-                        <option value="Quality Control">Quality Control</option>
-                        <option value="Process Improvement">Process Improvement</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Deskripsi</label>
-                    <textarea id="workDescription" class="admin-input" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Foto</label>
-                    <input type="file" id="workImageInput" accept="image/*" class="admin-input">
-                </div>
-                <div id="workImagePreview" style="display:none; margin-top:10px;">
-                    <img id="workPreviewImage" src="" style="max-width:100%; border-radius:10px;">
-                </div>
-                <div style="display:flex; gap:15px; margin-top:30px;">
-                    <button type="submit" class="admin-btn" id="saveWorkBtn">Simpan</button>
-                    <button type="button" class="admin-btn" style="background:var(--gradient-dark);" id="cancelWorkBtn">Batal</button>
-                </div>
-            </form>
-        </div>
-    </div>
-    
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner"></div>
-        <div class="loading-text" id="loadingText">Loading...</div>
-    </div>
-    
+    <!-- Loading & Notification -->
+    <div class="loading-overlay" id="loadingOverlay"><div class="loading-spinner"></div><div class="loading-text" id="loadingText">Loading...</div></div>
     <div class="notification" id="notification"></div>
 
     <script>
-        // ==================== DATA & CONFIG ====================
-        const ADMIN_PASSWORD = "arya2025";
-        let isAdminLoggedIn = false;
-        let isEditMode = false;
-        let currentPage = "home";
-        let currentUploadType = null;
-        let currentItemId = null;
-        let currentImageFile = null;
-        let currentImageUrl = null;
-        let editingWorkId = null;
-        let rainEffectActive = false;
-        let starfallEffectActive = false;
-        let currentEffectPage = null;
+        // ==================== ENKRIPSI ====================
+        const ENCRYPTION_KEY = "arya-secret-key-2026";
+        const ADMIN_PASSWORD_HASH = "5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8"; // SHA-256 dari "arya2025"
 
+        function encryptData(data) {
+            return CryptoJS.AES.encrypt(JSON.stringify(data), ENCRYPTION_KEY).toString();
+        }
+        function decryptData(ciphertext) {
+            const bytes = CryptoJS.AES.decrypt(ciphertext, ENCRYPTION_KEY);
+            return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+        }
+
+        // ==================== DATA APLIKASI ====================
         let appData = {
             user: {
                 name: "Arya Savariansah",
@@ -1594,7 +637,7 @@
             pages: {
                 home: {
                     title: "Home",
-                    description: "Selamat datang",
+                    description: "Selamat datang di portfolio Arya Savariansah",
                     badge: "✨ Lulusan SMK Teknik Permesinan ✨",
                     mainTitle: "ARYA SAVARIANSAH",
                     subtitle: "Spesialis Manufaktur & Produksi",
@@ -1608,777 +651,229 @@
                 },
                 about: {
                     title: "About Me",
-                    description: "Tentang saya",
+                    description: "Tentang latar belakang dan keahlian saya",
                     sections: [
-                        { id: "aboutText1", content: "Lulusan SMK Teknik Permesinan dengan pengalaman di bidang manufaktur dan produksi." },
-                        { id: "aboutText2", content: "Memiliki kemampuan dalam meningkatkan efisiensi produksi, menurunkan reject, serta mendukung proses manufaktur melalui desain teknis." }
+                        { id: "aboutText1", content: "Lulusan SMK Teknik Permesinan dengan pengalaman di bidang manufaktur dan produksi. Terbiasa menangani perencanaan produksi, quality control, manajemen stok & distribusi, hingga mechanical drafting." },
+                        { id: "aboutText2", content: "Memiliki kemampuan dalam meningkatkan efisiensi produksi, menurunkan tingkat reject, serta mendukung kelancaran proses manufaktur melalui desain teknis dan perencanaan yang sistematis." }
                     ],
                     skills: {
-                        technical: ["AutoCAD","SolidWorks","Gambar Teknik","Bubut, Milling","Production Planning","Quality Control","Preventive Maintenance","Microsoft Office","Basic ERP"],
-                        personal: ["Problem Solving","Teamwork","Manajemen Waktu","Detail-Oriented","Disiplin","Komunikasi Efektif"]
+                        technical: ["AutoCAD","SolidWorks","Gambar Teknik","Bubut & Milling","Production Planning","Quality Control","Preventive Maintenance","Microsoft Office","Basic ERP"],
+                        personal: ["Problem Solving","Teamwork","Manajemen Waktu","Detail-Oriented","Disiplin","Adaptif","Komunikasi Efektif"]
                     },
                     experiences: [
-                        { id: "experience1", title: "Mechanical Drafter Manufacturing", date: "Jun 2025 - Sekarang", items: ["Sistem pendataan molding","Standarisasi variasi molding","Mengurangi waktu setup 15%"] },
-                        { id: "experience2", title: "Staff Produksi", date: "Jun 2024 - Jun 2025", items: ["Menurunkan overconsumption material","Monitoring bahan","Optimasi WIP","Menurunkan reject mesin spiral 8%→3%"] }
+                        { id: "experience1", title: "Mechanical Drafter Manufacturing", date: "Jun 2025 - Sekarang", items: ["Membuat sistem pendataan molding beserta lifetime usage","Menyatukan variasi pengaturan molding menjadi 1 standar","Mempercepat setup operator bubut dengan drawing detail"] },
+                        { id: "experience2", title: "Staff Produksi", date: "Jun 2024 - Jun 2025", items: ["Menurunkan overconsumption material","Monitoring bahan dan non-conformance","Meningkatkan produktivitas WIP dari 2 Ton menjadi 724,5 kg","Menurunkan reject mesin spiral dari 8% menjadi 3%"] }
                     ]
                 },
-                work: { title: "Work", description: "Dokumentasi pekerjaan", items: [] },
-                achievements: { title: "Achievements", description: "Pencapaian", items: [] },
-                projects: {
-                    title: "Projects",
-                    description: "Proyek",
+                achievements: {
+                    title: "Achievements",
+                    description: "Pencapaian dan sertifikat profesional",
                     items: [
-                        { id: "project1", title: "Sistem Pendataan Molding", description: "Membuat sistem pendataan molding", stats: [{ value:"100%", label:"Data Manual"},{ value:"↓40%", label:"Downtime", type:"improvement"},{ value:"15%", label:"Setup Time"}] },
-                        { id: "project2", title: "Optimasi Produksi WIP", description: "Meningkatkan produktivitas", stats: [{ value:"2 Ton", label:"Sebelum"},{ value:"↓63.8%", label:"Pengurangan", type:"improvement"},{ value:"724.5 kg", label:"Sesudah"}] },
-                        { id: "project3", title: "Reduksi Reject Mesin Spiral", description: "Menurunkan reject", stats: [{ value:"8%", label:"Sebelum"},{ value:"↓62.5%", label:"Penurunan", type:"reduction"},{ value:"3%", label:"Sesudah"}] }
+                        { id: "ach1", title: "Sertifikat AutoCAD", date: "2024", description: "Pelatihan AutoCAD tingkat lanjut", image: null },
+                        { id: "ach2", title: "Penghargaan Karyawan Terbaik", date: "2025", description: "Penghargaan bulanan atas kontribusi dalam efisiensi produksi", image: null }
                     ]
                 },
-                dashboard: {
-                    title: "Dashboard",
-                    description: "Statistik",
-                    periods: [
-                        { id:"staffPeriod", title:"Staff Production", date:"Jun 2024 - Jun 2025", stats: [
-                            { id:"staffStat1", value:"60%", label:"Penurunan Reject Material" },
-                            { id:"staffStat2", value:"63.8%", label:"Pengurangan WIP" },
-                            { id:"staffStat3", value:"62.5%", label:"Penurunan Reject Spiral" },
-                            { id:"staffStat4", value:"90%", label:"Kesesuaian Dokumen" }
-                        ]},
-                        { id:"drafterPeriod", title:"Mechanical Drafter", date:"Jun 2025 - Sekarang", stats: [
-                            { id:"drafterStat1", value:"15%", label:"Pengurangan Waktu Setup" },
-                            { id:"drafterStat2", value:"40%", label:"Pengurangan Downtime" },
-                            { id:"drafterStat3", value:"67%", label:"Pengurangan Lead Time" },
-                            { id:"drafterStat4", value:"100%", label:"Standarisasi Setting" }
-                        ]}
+                chat: {
+                    messages: [
+                        { user: "Vernita Chesnauer", time: "01/04/2025, 14:00", text: "Hahnyuga! Love the design!" },
+                        { user: "Rufa Resto Ramadhani", time: "01/04/2025, 14:37", text: "Halo mas! Awesome portfolio!" }
                     ]
                 },
                 contact: {
                     title: "Contact",
-                    description: "Hubungi saya",
+                    description: "Hubungi saya untuk kolaborasi",
                     items: [
-                        { id:"contactEmail", value:"aryasavarinasah@gmail.com", label:"Email" },
-                        { id:"contactPhone", value:"089520336532", label:"Telepon" },
-                        { id:"contactLocation", value:"Kosambi, Indonesia", label:"Lokasi" },
-                        { id:"contactLinkedin", value:"linkedin.com/in/arya-savariansah", label:"LinkedIn" }
+                        { id: "contactEmail", type: "email", value: "aryasavarinasah@gmail.com", icon: "fas fa-envelope", label: "Email" },
+                        { id: "contactPhone", type: "phone", value: "089520336532", icon: "fas fa-phone", label: "Telepon" },
+                        { id: "contactLocation", type: "location", value: "Kosambi, Indonesia", icon: "fas fa-map-marker-alt", label: "Lokasi" },
+                        { id: "contactLinkedin", type: "linkedin", value: "linkedin.com/in/arya-savariansah", icon: "fab fa-linkedin", label: "LinkedIn" }
                     ]
                 }
             }
         };
 
-        // ==================== UTILITIES ====================
-        function loadFromStorage() {
+        // ==================== STATE ====================
+        let isAdminLoggedIn = false;
+        let isEditMode = false;
+        let currentPage = "home";
+        let rainEffectActive = false, starfallEffectActive = false, currentEffectPage = null;
+
+        // ==================== FUNGSI STORAGE ====================
+        function loadFromLocalStorage() {
             const saved = localStorage.getItem('portfolioData');
             if (saved) {
                 try {
-                    const data = JSON.parse(saved);
-                    appData = { ...appData, ...data };
-                    if (!appData.pages.work.items) appData.pages.work.items = [];
+                    const decrypted = decryptData(saved);
+                    appData = { ...appData, ...decrypted };
+                    // pastikan achievements.items ada
                     if (!appData.pages.achievements.items) appData.pages.achievements.items = [];
-                } catch (e) { console.error(e); }
+                    if (!appData.pages.chat) appData.pages.chat = { messages: [] };
+                } catch (e) { console.warn("Gagal decrypt, pakai default"); }
             }
         }
-
-        function saveToStorage() {
-            localStorage.setItem('portfolioData', JSON.stringify(appData));
-            showNotification('Data tersimpan', 'success');
+        function saveToLocalStorage() {
+            const encrypted = encryptData(appData);
+            localStorage.setItem('portfolioData', encrypted);
+            showNotification('Data tersimpan!', 'success');
         }
 
-        function uploadImage(file, type, itemId = null) {
-            return new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const key = `${type}_${itemId || 'profile'}_${Date.now()}`;
-                    localStorage.setItem(key, e.target.result);
-                    resolve({ key, dataUrl: e.target.result });
-                };
-                reader.readAsDataURL(file);
+        // ==================== RENDER HALAMAN ====================
+        function renderPage(pageId) {
+            if (pageId === 'home') renderHome();
+            else if (pageId === 'about') renderAbout();
+            else if (pageId === 'achievements') renderAchievements();
+            else if (pageId === 'chatroom') renderChat();
+            else if (pageId === 'contact') renderContact();
+        }
+        function renderHome() {
+            const p = appData.pages.home;
+            document.getElementById('homeBadge').textContent = p.badge;
+            document.getElementById('homeTitle').textContent = p.mainTitle;
+            document.getElementById('homeSubtitle').innerHTML = `<i class="fas fa-star" style="color: var(--primary); margin-right: 10px;"></i> ${p.subtitle} <i class="fas fa-star" style="color: var(--primary); margin-left: 10px;"></i>`;
+            document.getElementById('homeDescription').textContent = p.descriptionText;
+            p.stats.forEach((s, i) => {
+                document.getElementById(`stat${i+1}Number`).textContent = s.number;
+                document.getElementById(`stat${i+1}Label`).textContent = s.label;
             });
         }
-
-        function removeImage(key) {
-            localStorage.removeItem(key);
-        }
-
-        function showLoading(text = 'Loading...') {
-            document.getElementById('loadingText').textContent = text;
-            document.getElementById('loadingOverlay').classList.add('active');
-        }
-
-        function hideLoading() {
-            document.getElementById('loadingOverlay').classList.remove('active');
-        }
-
-        function showNotification(msg, type = 'info') {
-            const notif = document.getElementById('notification');
-            notif.textContent = msg;
-            notif.style.background = type === 'success' ? 'var(--gradient-gold)' : type === 'error' ? 'var(--gradient-danger)' : 'var(--gradient-gold)';
-            notif.style.display = 'block';
-            setTimeout(() => notif.style.display = 'none', 3000);
-        }
-
-        function openModal(modal) { modal.classList.add('active'); document.body.style.overflow = 'hidden'; }
-        function closeModal(modal) { modal.classList.remove('active'); document.body.style.overflow = 'auto'; }
-
-        // ==================== RENDER FUNCTIONS ====================
-        function renderHomePage() {
-            const h = appData.pages.home;
-            document.getElementById('homeBadge').innerText = h.badge;
-            document.getElementById('homeTitle').innerText = h.mainTitle;
-            document.getElementById('homeSubtitle').innerHTML = `<i class="fas fa-star" style="color:var(--primary);"></i> ${h.subtitle} <i class="fas fa-star" style="color:var(--primary);"></i>`;
-            document.getElementById('homeDescription').innerText = h.descriptionText;
-            h.stats.forEach((s,i) => {
-                document.getElementById(`stat${i+1}Number`).innerText = s.number;
-                document.getElementById(`stat${i+1}Label`).innerText = s.label;
-            });
-        }
-
-        function renderAboutPage() {
+        function renderAbout() {
             const a = appData.pages.about;
             document.getElementById('aboutText1').innerHTML = `<p>${a.sections[0].content}</p>`;
             document.getElementById('aboutText2').innerHTML = `<p>${a.sections[1].content}</p>`;
-            document.querySelector('#technicalSkills .skill-items').innerHTML = a.skills.technical.map(s => `<div class="skill-item">${s}</div>`).join('');
-            document.querySelector('#personalSkills .skill-items').innerHTML = a.skills.personal.map(s => `<div class="skill-item">${s}</div>`).join('');
-
-            const timeline = document.querySelector('.experience-timeline');
-            timeline.innerHTML = '';
+            // skills
+            const techDiv = document.querySelector('#technicalSkills .skill-items');
+            if (techDiv) techDiv.innerHTML = a.skills.technical.map(s => `<div class="skill-item">${s}</div>`).join('');
+            const persDiv = document.querySelector('#personalSkills .skill-items');
+            if (persDiv) persDiv.innerHTML = a.skills.personal.map(s => `<div class="skill-item">${s}</div>`).join('');
+            // experiences
+            const expContainer = document.querySelector('.experience-timeline');
+            expContainer.innerHTML = '';
             a.experiences.forEach(exp => {
-                const el = document.createElement('div');
-                el.className = 'experience-item editable';
-                el.id = exp.id;
-                el.innerHTML = `
-                    <div class="experience-header">
-                        <h3 class="experience-title">${exp.title}</h3>
-                        <div class="experience-date">${exp.date}</div>
+                expContainer.innerHTML += `
+                    <div class="experience-item editable" id="${exp.id}">
+                        <div class="experience-header"><h3 class="experience-title">${exp.title}</h3><div class="experience-date">${exp.date}</div></div>
+                        <div class="experience-content"><ul>${exp.items.map(i => `<li>${i}</li>`).join('')}</ul></div>
+                        ${(isAdminLoggedIn||isEditMode)?`<button class="edit-btn" data-edit="${exp.id}">Edit</button><button class="delete-btn" data-delete="${exp.id}" data-type="experience">Hapus</button>`:''}
                     </div>
-                    <div class="experience-content"><ul>${exp.items.map(i=>`<li>${i}</li>`).join('')}</ul></div>
-                    <button class="edit-btn" data-edit="${exp.id}">Edit</button>
-                    <button class="delete-btn" data-delete="${exp.id}" data-type="experience">Hapus</button>
                 `;
-                timeline.appendChild(el);
             });
-            timeline.innerHTML += `<button class="add-btn" data-add="experience">+ Tambah Pengalaman</button>`;
+            expContainer.innerHTML += `<button class="add-btn" data-add="experience">+ Tambah Pengalaman</button>`;
         }
-
-        function renderWorkPage() {
-            const container = document.getElementById('workContainer');
-            container.innerHTML = '';
-            const items = [...appData.pages.work.items].sort((a,b)=> (b.date||'').localeCompare(a.date||''));
-            items.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'work-card editable';
-                card.id = item.id;
-                const imageHTML = item.image ? 
-                    `<div class="work-image-container" onclick="openImagePreview('${item.image}','${item.title}')">
-                        <img src="${item.image}" class="work-image"><div class="category-badge">${item.category}</div>
-                    </div>` :
-                    `<div class="work-image-container" onclick="editWorkImage('${item.id}')">
-                        <div class="work-image-placeholder"><i class="fas fa-camera"></i></div>
-                        <div class="category-badge">${item.category}</div>
-                    </div>`;
-                card.innerHTML = imageHTML + `
-                    <h3>${item.title}</h3>
-                    <div class="date"><i class="far fa-calendar"></i> ${item.date}</div>
-                    <p>${item.description}</p>
-                    ${(isAdminLoggedIn||isEditMode) ? `<button class="edit-btn" onclick="editWork('${item.id}')">Edit</button>
-                    <button class="delete-btn" onclick="deleteWork('${item.id}')">Hapus</button>` : ''}
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function renderAchievementsPage() {
+        function renderAchievements() {
             const container = document.getElementById('achievementsContainer');
             container.innerHTML = '';
-            appData.pages.achievements.items.forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'achievement-card editable';
-                card.id = item.id;
-                const imageHTML = item.image ? 
-                    `<div class="achievement-image-container" onclick="openImagePreview('${item.image}','${item.title}')">
-                        <img src="${item.image}" class="achievement-image">
-                    </div>` :
-                    `<div class="achievement-image-container" onclick="editAchievementImage('${item.id}')">
-                        <div class="achievement-image-placeholder"><i class="fas fa-trophy"></i></div>
-                    </div>`;
-                card.innerHTML = imageHTML + `
-                    <h3>${item.title}</h3>
-                    <div class="date">${item.date}</div>
-                    <p>${item.description}</p>
-                    ${(isAdminLoggedIn||isEditMode) ? `<button class="edit-btn" onclick="editAchievement('${item.id}')">Edit</button>
-                    <button class="delete-btn" onclick="deleteAchievement('${item.id}')">Hapus</button>` : ''}
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function renderProjectsPage() {
-            const container = document.getElementById('projectsContainer');
-            container.innerHTML = '';
-            appData.pages.projects.items.forEach(p => {
-                const statsHTML = p.stats ? `<div class="project-stats">${p.stats.map(s => `<div class="stat"><span class="stat-value ${s.type||''}">${s.value}</span><span class="stat-label">${s.label}</span></div>`).join('')}</div>` : '';
-                const card = document.createElement('div');
-                card.className = 'project-card editable';
-                card.id = p.id;
-                card.innerHTML = `<h3><i class="fas fa-project-diagram"></i> ${p.title}</h3><p>${p.description}</p>${statsHTML}
-                    ${(isAdminLoggedIn||isEditMode) ? `<button class="edit-btn" onclick="editProject('${p.id}')">Edit</button>
-                    <button class="delete-btn" onclick="deleteProject('${p.id}')">Hapus</button>` : ''}`;
-                container.appendChild(card);
-            });
-        }
-
-        function renderDashboardPage() {
-            const d = appData.pages.dashboard;
-            const container = document.getElementById('dashboardContainer') || document.querySelector('.dashboard-periods');
-            container.innerHTML = '';
-            d.periods.forEach(per => {
-                const statsHTML = per.stats.map(s => `
-                    <div class="period-stat editable" id="${s.id}">
-                        <div class="period-stat-value ${per.id.includes('staff')?'staff':'drafter'}">${s.value}</div>
-                        <div class="period-stat-label">${s.label}</div>
-                        <button class="edit-btn" data-edit="${s.id}">Edit</button>
-                    </div>`).join('');
-                const section = document.createElement('div');
-                section.className = 'period-section editable';
-                section.id = per.id;
-                section.innerHTML = `
-                    <div class="period-header">
-                        <h2 class="period-title">${per.title}</h2>
-                        <div class="period-date"><i class="far fa-calendar"></i> ${per.date}</div>
+            appData.pages.achievements.items.forEach(ach => {
+                let imgHtml = ach.image ? `<img src="${ach.image}" alt="${ach.title}" class="achievement-image">` : '<div class="achievement-image-placeholder"><i class="fas fa-trophy"></i></div>';
+                container.innerHTML += `
+                    <div class="achievement-card editable" id="${ach.id}">
+                        <div class="achievement-image-container" onclick="openImageUploadModal('achievement','${ach.id}')">${imgHtml}</div>
+                        <h3>${ach.title}</h3>
+                        <div class="date">${ach.date}</div>
+                        <p>${ach.description}</p>
+                        ${(isAdminLoggedIn||isEditMode)?`<button class="edit-btn" onclick="editAchievement('${ach.id}')">Edit</button><button class="delete-btn" onclick="deleteAchievement('${ach.id}')">Hapus</button>`:''}
                     </div>
-                    <div class="period-stats">${statsHTML}</div>
-                    <button class="edit-btn" data-edit="${per.id}">Edit</button>
                 `;
-                container.appendChild(section);
             });
         }
-
-        function renderContactPage() {
-            appData.pages.contact.items.forEach(c => {
-                const el = document.getElementById(c.id);
-                if (el) el.querySelector('p').innerText = c.value;
+        function renderChat() {
+            const chatDiv = document.getElementById('chatMessages');
+            chatDiv.innerHTML = '';
+            appData.pages.chat.messages.forEach(msg => {
+                chatDiv.innerHTML += `
+                    <div class="message ${msg.user === 'You' ? 'user' : ''}">
+                        <div class="message-info"><span class="message-user">${msg.user}</span><span class="message-time">${msg.time}</span></div>
+                        <div class="message-content">${msg.text}</div>
+                    </div>
+                `;
+            });
+            chatDiv.scrollTop = chatDiv.scrollHeight;
+        }
+        function renderContact() {
+            appData.pages.contact.items.forEach(item => {
+                const el = document.getElementById(item.id);
+                if (el) el.querySelector('p').textContent = item.value;
             });
         }
-
         function renderProfileImage() {
             const imgDiv = document.getElementById('profileImg');
             if (appData.user.profileImage) {
                 imgDiv.innerHTML = `<img src="${appData.user.profileImage}" style="width:100%;height:100%;object-fit:cover;">`;
             } else {
-                imgDiv.innerHTML = `<div class="profile-img-placeholder"><i class="fas fa-user-tie"></i></div>`;
+                imgDiv.innerHTML = '<div class="profile-img-placeholder"><i class="fas fa-user-tie"></i></div>';
             }
         }
 
-        function renderPage(page) {
-            switch(page) {
-                case 'home': renderHomePage(); break;
-                case 'about': renderAboutPage(); break;
-                case 'work': renderWorkPage(); break;
-                case 'achievements': renderAchievementsPage(); break;
-                case 'projects': renderProjectsPage(); break;
-                case 'dashboard': renderDashboardPage(); break;
-                case 'contact': renderContactPage(); break;
-            }
-            updateAdminUI();
-            setupEditModeListeners();
-        }
-
-        function changePage(page) {
-            if (rainEffectActive) toggleRainEffect();
-            if (starfallEffectActive) toggleStarfallEffect();
-            hideEffectToggle();
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(page + 'Page').classList.add('active');
-            currentPage = page;
-            const pageData = appData.pages[page];
-            if (pageData) {
-                document.getElementById('currentPageTitle').innerText = pageData.title;
-                document.getElementById('currentPageDesc').innerText = pageData.description;
-            }
-            renderPage(page);
-            document.querySelector('.main-content').scrollTop = 0;
-            if (page === 'about' || page === 'chatroom') {
-                setTimeout(() => showEffectToggle(page === 'about' ? 'Rain Effect' : 'Starfall Effect', page === 'about' ? 'fas fa-cloud-rain' : 'fas fa-star'), 500);
-            }
-        }
-
-        // ==================== ADMIN & EDIT ====================
+        // ==================== ADMIN ====================
         function updateAdminUI() {
-            const adminToggle = document.getElementById('adminToggle');
-            const floatingBtn = document.getElementById('floatingAddBtn');
-            if (isAdminLoggedIn) {
-                adminToggle.innerHTML = '<i class="fas fa-user-check"></i> Admin Mode';
-                adminToggle.style.background = 'var(--gradient-gold)';
-                adminToggle.style.color = '#000';
-                document.body.classList.add('admin-mode');
-                floatingBtn.style.display = currentPage === 'work' ? 'flex' : 'none';
-            } else {
-                adminToggle.innerHTML = '<i class="fas fa-user-lock"></i> Login Admin';
-                adminToggle.style.background = 'linear-gradient(135deg, #1e1e1e, #2a2a2a)';
-                adminToggle.style.color = 'var(--primary)';
-                document.body.classList.remove('admin-mode');
-                floatingBtn.style.display = 'none';
-            }
+            document.body.classList.toggle('admin-mode', isAdminLoggedIn || isEditMode);
             document.getElementById('editStatus').style.display = isEditMode ? 'block' : 'none';
-        }
-
-        function setupEditModeListeners() {
-            document.querySelectorAll('.edit-btn:not([data-listener])').forEach(btn => {
-                btn.setAttribute('data-listener', 'true');
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const id = btn.getAttribute('data-edit');
-                    editElement(id);
-                });
-            });
-            document.querySelectorAll('.delete-btn:not([data-listener])').forEach(btn => {
-                btn.setAttribute('data-listener', 'true');
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const id = btn.getAttribute('data-delete');
-                    const type = btn.getAttribute('data-type');
-                    deleteElement(id, type);
-                });
-            });
-            document.querySelectorAll('.add-btn:not([data-listener])').forEach(btn => {
-                btn.setAttribute('data-listener', 'true');
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const type = btn.getAttribute('data-add');
-                    addElement(type);
-                });
-            });
-        }
-
-        function editElement(id) {
-            const el = document.getElementById(id);
-            if (!el) return;
-            if (el.classList.contains('skill-category')) editSkills(id);
-            else if (el.classList.contains('experience-item')) editExperience(id);
-            else if (id.startsWith('stat') || el.classList.contains('period-stat')) editStat(id);
-            else if (el.classList.contains('contact-card')) editContact(id);
-            else if (el.classList.contains('period-section')) editPeriod(id);
-            else editText(id);
-        }
-
-        function editText(id) {
-            const el = document.getElementById(id);
-            const newText = prompt('Edit teks:', el.innerText);
-            if (newText && newText !== el.innerText) {
-                el.innerText = newText;
-                if (id.startsWith('stat')) {
-                    const idx = parseInt(id.replace('stat','').replace('Number','').replace('Label','')) - 1;
-                    if (id.includes('Number')) appData.pages.home.stats[idx].number = newText;
-                    else appData.pages.home.stats[idx].label = newText;
-                } else if (id === 'homeBadge') appData.pages.home.badge = newText;
-                else if (id === 'homeTitle') appData.pages.home.mainTitle = newText;
-                else if (id === 'homeSubtitle') appData.pages.home.subtitle = newText;
-                else if (id === 'homeDescription') appData.pages.home.descriptionText = newText;
-                else if (id === 'aboutText1') appData.pages.about.sections[0].content = newText;
-                else if (id === 'aboutText2') appData.pages.about.sections[1].content = newText;
-                saveToStorage();
-            }
-        }
-
-        function editSkills(id) {
-            const isTech = id === 'technicalSkills';
-            const current = isTech ? appData.pages.about.skills.technical : appData.pages.about.skills.personal;
-            const input = prompt('Edit skill (pisahkan baris):', current.join('\n'));
-            if (input) {
-                const newArr = input.split('\n').filter(s => s.trim());
-                if (isTech) appData.pages.about.skills.technical = newArr;
-                else appData.pages.about.skills.personal = newArr;
-                renderAboutPage();
-                saveToStorage();
-            }
-        }
-
-        function editExperience(id) {
-            const exp = appData.pages.about.experiences.find(e => e.id === id);
-            if (!exp) return;
-            const newTitle = prompt('Judul:', exp.title);
-            if (!newTitle) return;
-            const newDate = prompt('Periode:', exp.date);
-            if (!newDate) return;
-            const newItems = prompt('Poin-poin (satu per baris):', exp.items.join('\n'));
-            if (!newItems) return;
-            exp.title = newTitle;
-            exp.date = newDate;
-            exp.items = newItems.split('\n').filter(i => i.trim());
-            renderAboutPage();
-            saveToStorage();
-        }
-
-        function editStat(id) {
-            const el = document.getElementById(id);
-            const valEl = el.querySelector('.period-stat-value') || el;
-            const labelEl = el.querySelector('.period-stat-label') || el.nextSibling;
-            if (!valEl || !labelEl) return;
-            const newVal = prompt('Edit nilai:', valEl.innerText);
-            if (!newVal) return;
-            const newLabel = prompt('Edit label:', labelEl.innerText);
-            if (!newLabel) return;
-            valEl.innerText = newVal;
-            labelEl.innerText = newLabel;
-            // update data
-            if (id.startsWith('staffStat') || id.startsWith('drafterStat')) {
-                const period = appData.pages.dashboard.periods.find(p => p.stats.some(s => s.id === id));
-                if (period) {
-                    const stat = period.stats.find(s => s.id === id);
-                    stat.value = newVal;
-                    stat.label = newLabel;
-                }
-            }
-            saveToStorage();
-        }
-
-        function editContact(id) {
-            const item = appData.pages.contact.items.find(i => i.id === id);
-            if (!item) return;
-            const newVal = prompt(`Edit ${item.label}:`, item.value);
-            if (newVal && newVal !== item.value) {
-                item.value = newVal;
-                document.getElementById(id).querySelector('p').innerText = newVal;
-                saveToStorage();
-            }
-        }
-
-        function editPeriod(id) {
-            const per = appData.pages.dashboard.periods.find(p => p.id === id);
-            if (!per) return;
-            const newTitle = prompt('Judul periode:', per.title);
-            if (!newTitle) return;
-            const newDate = prompt('Rentang tanggal:', per.date);
-            if (!newDate) return;
-            per.title = newTitle;
-            per.date = newDate;
-            renderDashboardPage();
-            saveToStorage();
-        }
-
-        function deleteElement(id, type) {
-            if (!confirm('Hapus?')) return;
-            if (type === 'experience') {
-                const idx = appData.pages.about.experiences.findIndex(e => e.id === id);
-                if (idx !== -1) appData.pages.about.experiences.splice(idx, 1);
-                renderAboutPage();
-            } else if (type === 'project') {
-                const idx = appData.pages.projects.items.findIndex(p => p.id === id);
-                if (idx !== -1) appData.pages.projects.items.splice(idx, 1);
-                renderProjectsPage();
-            }
-            saveToStorage();
-        }
-
-        function addElement(type) {
-            if (type === 'technicalSkills' || type === 'personalSkills') {
-                const skill = prompt('Skill baru:');
-                if (skill) {
-                    if (type === 'technicalSkills') appData.pages.about.skills.technical.push(skill);
-                    else appData.pages.about.skills.personal.push(skill);
-                    renderAboutPage();
-                    saveToStorage();
-                }
-            } else if (type === 'experience') {
-                const title = prompt('Judul pengalaman:');
-                if (!title) return;
-                const date = prompt('Periode:');
-                if (!date) return;
-                const items = prompt('Poin-poin (satu per baris):');
-                if (!items) return;
-                const newId = 'exp' + Date.now();
-                appData.pages.about.experiences.push({ id: newId, title, date, items: items.split('\n').filter(i=>i.trim()) });
-                renderAboutPage();
-                saveToStorage();
-            } else if (type === 'achievement') {
-                const title = prompt('Judul pencapaian:');
-                if (!title) return;
-                const date = prompt('Tanggal:');
-                if (!date) return;
-                const desc = prompt('Deskripsi:');
-                if (!desc) return;
-                appData.pages.achievements.items.push({ id: 'ach' + Date.now(), title, date, description: desc, image: null });
-                renderAchievementsPage();
-                saveToStorage();
-            } else if (type === 'project') {
-                const title = prompt('Judul proyek:');
-                if (!title) return;
-                const desc = prompt('Deskripsi:');
-                if (!desc) return;
-                appData.pages.projects.items.push({ id: 'proj' + Date.now(), title, description: desc, stats: [] });
-                renderProjectsPage();
-                saveToStorage();
-            }
-        }
-
-        // Work specific
-        window.editWork = (id) => { openWorkUploadModal(id); };
-        window.deleteWork = (id) => {
-            if (!confirm('Hapus work?')) return;
-            const idx = appData.pages.work.items.findIndex(w => w.id === id);
-            if (idx !== -1) {
-                if (appData.pages.work.items[idx].imageKey) removeImage(appData.pages.work.items[idx].imageKey);
-                appData.pages.work.items.splice(idx, 1);
-                renderWorkPage();
-                saveToStorage();
-            }
-        };
-        window.editWorkImage = (id) => { openImageUploadModal('work', id); };
-
-        // Achievement specific
-        window.editAchievement = (id) => {
-            const ach = appData.pages.achievements.items.find(a => a.id === id);
-            if (!ach) return;
-            const title = prompt('Judul:', ach.title);
-            if (!title) return;
-            const date = prompt('Tanggal:', ach.date);
-            if (!date) return;
-            const desc = prompt('Deskripsi:', ach.description);
-            if (!desc) return;
-            ach.title = title; ach.date = date; ach.description = desc;
-            renderAchievementsPage();
-            saveToStorage();
-        };
-        window.deleteAchievement = (id) => {
-            if (!confirm('Hapus achievement?')) return;
-            const idx = appData.pages.achievements.items.findIndex(a => a.id === id);
-            if (idx !== -1) {
-                if (appData.pages.achievements.items[idx].imageKey) removeImage(appData.pages.achievements.items[idx].imageKey);
-                appData.pages.achievements.items.splice(idx, 1);
-                renderAchievementsPage();
-                saveToStorage();
-            }
-        };
-        window.editAchievementImage = (id) => { openImageUploadModal('achievement', id); };
-
-        // Project specific
-        window.editProject = (id) => {
-            const proj = appData.pages.projects.items.find(p => p.id === id);
-            if (!proj) return;
-            const title = prompt('Judul proyek:', proj.title);
-            if (!title) return;
-            const desc = prompt('Deskripsi:', proj.description);
-            if (!desc) return;
-            proj.title = title; proj.description = desc;
-            renderProjectsPage();
-            saveToStorage();
-        };
-        window.deleteProject = (id) => {
-            if (!confirm('Hapus proyek?')) return;
-            const idx = appData.pages.projects.items.findIndex(p => p.id === id);
-            if (idx !== -1) {
-                appData.pages.projects.items.splice(idx, 1);
-                renderProjectsPage();
-                saveToStorage();
-            }
-        };
-
-        // ==================== MODALS ====================
-        function openImageUploadModal(type, itemId = null) {
-            currentUploadType = type;
-            currentItemId = itemId;
-            const modal = document.getElementById('imageUploadModal');
-            const title = document.getElementById('modalTitle');
-            let currentImage = null;
-            if (type === 'profile') { title.innerText = 'Upload Foto Profile'; currentImage = appData.user.profileImage; }
-            else if (type === 'work' && itemId) {
-                const work = appData.pages.work.items.find(w => w.id === itemId);
-                if (work) { title.innerText = `Foto: ${work.title}`; currentImage = work.image; }
-            } else if (type === 'achievement' && itemId) {
-                const ach = appData.pages.achievements.items.find(a => a.id === itemId);
-                if (ach) { title.innerText = `Foto: ${ach.title}`; currentImage = ach.image; }
-            }
-            if (currentImage) {
-                document.getElementById('previewImage').src = currentImage;
-                document.getElementById('imagePreview').style.display = 'block';
-                document.getElementById('removeImageBtn').style.display = 'inline-block';
+            const toggleBtn = document.getElementById('adminToggle');
+            if (isAdminLoggedIn) {
+                toggleBtn.innerHTML = '<i class="fas fa-user-check"></i> Admin Mode';
+                toggleBtn.style.background = 'var(--gradient-gold)';
+                toggleBtn.style.color = '#000';
             } else {
-                document.getElementById('imagePreview').style.display = 'none';
-                document.getElementById('removeImageBtn').style.display = 'none';
-            }
-            openModal(modal);
-        }
-
-        function resetImageModal() {
-            document.getElementById('imageInput').value = '';
-            document.getElementById('previewImage').src = '';
-            document.getElementById('imagePreview').style.display = 'none';
-            document.getElementById('removeImageBtn').style.display = 'none';
-            currentUploadType = null; currentItemId = null; currentImageFile = null; currentImageUrl = null;
-        }
-
-        function openWorkUploadModal(editId = null) {
-            if (!isAdminLoggedIn && !isEditMode) { showNotification('Login admin dulu', 'error'); return; }
-            const modal = document.getElementById('workUploadModal');
-            const form = document.getElementById('workUploadForm');
-            form.reset();
-            document.getElementById('workImagePreview').style.display = 'none';
-            if (editId) {
-                const work = appData.pages.work.items.find(w => w.id === editId);
-                if (work) {
-                    document.getElementById('workTitle').value = work.title;
-                    document.getElementById('workDate').value = work.date;
-                    document.getElementById('workCategory').value = work.category;
-                    document.getElementById('workDescription').value = work.description;
-                    if (work.image) {
-                        document.getElementById('workPreviewImage').src = work.image;
-                        document.getElementById('workImagePreview').style.display = 'block';
-                    }
-                }
-                editingWorkId = editId;
-                document.getElementById('workModalTitle').innerText = 'Edit Work';
-                document.getElementById('saveWorkBtn').innerText = 'Update';
-            } else {
-                editingWorkId = null;
-                document.getElementById('workModalTitle').innerText = 'Tambah Work';
-                document.getElementById('saveWorkBtn').innerText = 'Simpan';
-            }
-            openModal(modal);
-        }
-
-        function resetWorkModal() {
-            document.getElementById('workUploadForm').reset();
-            document.getElementById('workImagePreview').style.display = 'none';
-            currentImageFile = null;
-            currentImageUrl = null;
-        }
-
-        window.openImagePreview = (src, title) => {
-            const win = window.open();
-            win.document.write(`<html><head><title>${title}</title><style>body{margin:0;background:#000;display:flex;justify-content:center;align-items:center;min-height:100vh;}img{max-width:90vw;max-height:90vh;border:2px solid gold;border-radius:10px;}</style></head><body><img src="${src}"></body></html>`);
-        };
-
-        // ==================== EFFECTS ====================
-        function showEffectToggle(text, icon) {
-            document.getElementById('effectText').innerText = text;
-            document.getElementById('effectIcon').className = icon;
-            document.getElementById('effectToggle').style.display = 'flex';
-            currentEffectPage = currentPage;
-        }
-        function hideEffectToggle() {
-            document.getElementById('effectToggle').style.display = 'none';
-        }
-        function toggleEffects() {
-            if (currentEffectPage === 'about') toggleRainEffect();
-            else if (currentEffectPage === 'chatroom') toggleStarfallEffect();
-        }
-        function toggleRainEffect() {
-            rainEffectActive = !rainEffectActive;
-            const rain = document.getElementById('rainContainer');
-            if (rainEffectActive) {
-                if (starfallEffectActive) toggleStarfallEffect();
-                rain.style.display = 'block';
-                rain.innerHTML = '';
-                for (let i = 0; i < 50; i++) {
-                    let drop = document.createElement('div');
-                    drop.className = 'rain-drop';
-                    drop.style.left = Math.random() * 100 + '%';
-                    drop.style.animationDelay = Math.random() * 2 + 's';
-                    drop.style.animationDuration = 0.5 + Math.random() * 0.5 + 's';
-                    rain.appendChild(drop);
-                }
-                document.getElementById('effectText').innerText = 'Matikan Rain Effect';
-                document.getElementById('effectToggle').style.background = 'var(--gradient-cyan)';
-                showNotification('Rain Effect aktif', 'success');
-            } else {
-                rain.style.display = 'none';
-                document.getElementById('effectText').innerText = 'Rain Effect';
-                document.getElementById('effectToggle').style.background = 'var(--gradient-gold)';
-                hideEffectToggle();
-            }
-        }
-        function toggleStarfallEffect() {
-            starfallEffectActive = !starfallEffectActive;
-            const star = document.getElementById('starfallContainer');
-            if (starfallEffectActive) {
-                if (rainEffectActive) toggleRainEffect();
-                star.style.display = 'block';
-                star.innerHTML = '';
-                for (let i = 0; i < 30; i++) {
-                    let s = document.createElement('div');
-                    s.className = 'star';
-                    s.style.left = Math.random() * 100 + '%';
-                    s.style.animationDelay = Math.random() * 3 + 's';
-                    s.style.animationDuration = 1 + Math.random() * 2 + 's';
-                    s.style.width = s.style.height = (2 + Math.random() * 3) + 'px';
-                    star.appendChild(s);
-                }
-                document.getElementById('effectText').innerText = 'Matikan Starfall Effect';
-                document.getElementById('effectToggle').style.background = 'var(--gradient-purple)';
-                showNotification('Starfall Effect aktif', 'success');
-            } else {
-                star.style.display = 'none';
-                document.getElementById('effectText').innerText = 'Starfall Effect';
-                document.getElementById('effectToggle').style.background = 'var(--gradient-gold)';
-                hideEffectToggle();
+                toggleBtn.innerHTML = '<i class="fas fa-user-lock"></i> Login Admin';
+                toggleBtn.style.background = 'linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%)';
+                toggleBtn.style.color = 'var(--primary)';
             }
         }
 
-        // ==================== CHAT ====================
-        function setupChat() {
-            document.getElementById('sendMessage').addEventListener('click', sendMessage);
-            document.getElementById('chatInput').addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
-        }
-        function sendMessage() {
-            const input = document.getElementById('chatInput');
-            const msg = input.value.trim();
-            if (!msg) return;
-            const chat = document.getElementById('chatMessages');
-            const time = new Date();
-            const timeStr = `${time.getDate()}/${time.getMonth()+1}/${time.getFullYear()}, ${time.getHours()}:${time.getMinutes()}`;
-            chat.innerHTML += `<div class="message user"><div class="message-info"><span>You</span><span>${timeStr}</span></div><div class="message-content">${msg}</div></div>`;
-            input.value = '';
-            chat.scrollTop = chat.scrollHeight;
-            setTimeout(() => {
-                chat.innerHTML += `<div class="message"><div class="message-info"><span>Arya</span><span>${timeStr}</span></div><div class="message-content">Thanks for your message!</div></div>`;
-                chat.scrollTop = chat.scrollHeight;
-            }, 1000);
-        }
+        // ==================== INISIALISASI ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            loadFromLocalStorage();
+            setupNavigation();
+            setupAdmin();
+            setupChat();
+            setupContactForm();
+            setupMobileMenu();
+            setupModals();
+            setupEffects();
+            renderPage(currentPage);
+            updateAdminUI();
+            renderProfileImage();
 
-        // ==================== CONTACT FORM ====================
-        function setupContactForm() {
-            document.getElementById('contactForm').addEventListener('submit', e => {
-                e.preventDefault();
-                showLoading('Mengirim...');
-                setTimeout(() => {
-                    alert('Pesan terkirim!');
-                    e.target.reset();
-                    hideLoading();
-                }, 1000);
-            });
-        }
+            // muat chat dari data
+            renderChat();
+        });
 
-        // ==================== NAVIGATION & INIT ====================
         function setupNavigation() {
             document.querySelectorAll('.nav-link').forEach(link => {
                 link.addEventListener('click', (e) => {
                     e.preventDefault();
+                    const page = link.dataset.page;
                     document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
                     link.classList.add('active');
-                    changePage(link.dataset.page);
-                    if (window.innerWidth <= 768) {
-                        document.getElementById('sidebar').classList.remove('active');
-                        document.getElementById('mobileMenuToggle').innerHTML = '<i class="fas fa-bars"></i>';
-                    }
+                    changePage(page);
+                    if (window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('active');
                 });
             });
         }
-
-        function setupMobileMenu() {
-            const toggle = document.getElementById('mobileMenuToggle');
-            toggle.addEventListener('click', () => {
-                document.getElementById('sidebar').classList.toggle('active');
-                toggle.innerHTML = document.getElementById('sidebar').classList.contains('active') ? '<i class="fas fa-times"></i>' : '<i class="fas fa-bars"></i>';
-            });
+        function changePage(pageId) {
+            if (rainEffectActive) toggleRainEffect();
+            if (starfallEffectActive) toggleStarfallEffect();
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId + 'Page').classList.add('active');
+            currentPage = pageId;
+            document.getElementById('currentPageTitle').textContent = appData.pages[pageId]?.title || pageId;
+            document.getElementById('currentPageDesc').textContent = appData.pages[pageId]?.description || '';
+            renderPage(pageId);
+            document.querySelector('.main-content').scrollTop = 0;
+            if (pageId === 'about' || pageId === 'chatroom') {
+                setTimeout(() => showEffectToggle(pageId === 'about' ? 'Rain Effect' : 'Starfall Effect', pageId === 'about' ? 'fas fa-cloud-rain' : 'fas fa-star'), 500);
+            } else hideEffectToggle();
         }
 
-        function setupAdminPanel() {
+        // ==================== ADMIN PANEL ====================
+        function setupAdmin() {
             const adminToggle = document.getElementById('adminToggle');
             const adminPanel = document.getElementById('adminPanel');
             adminToggle.addEventListener('click', (e) => { e.stopPropagation(); adminPanel.classList.toggle('active'); });
-            document.addEventListener('click', (e) => {
-                if (!e.target.closest('.admin-panel') && !e.target.closest('.admin-toggle')) adminPanel.classList.remove('active');
-            });
+            document.addEventListener('click', (e) => { if (!e.target.closest('.admin-panel') && !e.target.closest('.admin-toggle')) adminPanel.classList.remove('active'); });
+
             document.getElementById('adminLogin').addEventListener('click', () => {
-                if (document.getElementById('adminPassword').value === ADMIN_PASSWORD) {
+                const pwd = document.getElementById('adminPassword').value;
+                if (CryptoJS.SHA256(pwd).toString() === ADMIN_PASSWORD_HASH) {
                     isAdminLoggedIn = true;
                     document.getElementById('adminControls').style.display = 'block';
                     showNotification('Login berhasil', 'success');
@@ -2386,213 +881,204 @@
                     adminPanel.classList.remove('active');
                 } else showNotification('Password salah', 'error');
             });
+
+            document.getElementById('toggleEditMode').addEventListener('click', () => {
+                if (!isAdminLoggedIn) return showNotification('Login dulu', 'error');
+                isEditMode = !isEditMode;
+                updateAdminUI();
+                document.getElementById('toggleEditMode').textContent = isEditMode ? 'Nonaktifkan Edit Mode' : 'Aktifkan Edit Mode';
+                renderPage(currentPage);
+            });
+
+            document.getElementById('saveAllData').addEventListener('click', () => { saveToLocalStorage(); });
             document.getElementById('adminLogout').addEventListener('click', () => {
                 isAdminLoggedIn = false; isEditMode = false;
                 document.getElementById('adminControls').style.display = 'none';
-                document.body.classList.remove('admin-mode');
-                document.getElementById('editStatus').style.display = 'none';
                 updateAdminUI();
+                showNotification('Logout', 'info');
                 renderPage(currentPage);
             });
-            document.getElementById('toggleEditMode').addEventListener('click', () => {
-                if (!isAdminLoggedIn) { showNotification('Login dulu', 'error'); return; }
-                isEditMode = !isEditMode;
-                document.body.classList.toggle('admin-mode', isEditMode);
-                document.getElementById('editStatus').style.display = isEditMode ? 'block' : 'none';
-                document.getElementById('toggleEditMode').innerText = isEditMode ? 'Nonaktifkan Edit Mode' : 'Aktifkan Edit Mode';
-                renderPage(currentPage);
-            });
-            document.getElementById('saveAllData').addEventListener('click', () => { showLoading(); setTimeout(() => { saveToStorage(); hideLoading(); }, 500); });
             document.getElementById('resetDataBtn').addEventListener('click', () => {
                 if (confirm('Reset data?')) { localStorage.clear(); location.reload(); }
             });
         }
 
-        function setupModals() {
-            const imageModal = document.getElementById('imageUploadModal');
-            document.getElementById('profileUploadBtn').addEventListener('click', (e) => { e.stopPropagation(); if (isAdminLoggedIn || isEditMode) openImageUploadModal('profile'); });
-            document.getElementById('imageInput').addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                if (file.size > 5*1024*1024) { showNotification('Max 5MB', 'error'); return; }
-                if (!file.type.startsWith('image/')) { showNotification('Bukan gambar', 'error'); return; }
-                currentImageFile = file;
-                const reader = new FileReader();
-                reader.onload = (ev) => { currentImageUrl = ev.target.result; document.getElementById('previewImage').src = ev.target.result; document.getElementById('imagePreview').style.display = 'block'; document.getElementById('removeImageBtn').style.display = 'inline-block'; };
-                reader.readAsDataURL(file);
-            });
-            document.getElementById('saveImageBtn').addEventListener('click', async () => {
-                if (!currentImageFile && !currentImageUrl) { showNotification('Pilih gambar', 'error'); return; }
-                showLoading('Upload...');
-                try {
-                    let finalUrl = currentImageUrl, finalKey = null;
-                    if (currentImageFile) {
-                        const up = await uploadImage(currentImageFile, currentUploadType, currentItemId);
-                        finalUrl = up.dataUrl; finalKey = up.key;
-                    }
-                    if (currentUploadType === 'profile') {
-                        if (appData.user.profileImageKey) removeImage(appData.user.profileImageKey);
-                        appData.user.profileImage = finalUrl; appData.user.profileImageKey = finalKey;
-                        renderProfileImage();
-                    } else if (currentUploadType === 'work' && currentItemId) {
-                        const work = appData.pages.work.items.find(w => w.id === currentItemId);
-                        if (work) {
-                            if (work.imageKey) removeImage(work.imageKey);
-                            work.image = finalUrl; work.imageKey = finalKey;
-                            renderWorkPage();
-                        }
-                    } else if (currentUploadType === 'achievement' && currentItemId) {
-                        const ach = appData.pages.achievements.items.find(a => a.id === currentItemId);
-                        if (ach) {
-                            if (ach.imageKey) removeImage(ach.imageKey);
-                            ach.image = finalUrl; ach.imageKey = finalKey;
-                            renderAchievementsPage();
-                        }
-                    }
-                    saveToStorage();
-                    hideLoading();
-                    closeModal(imageModal);
-                    resetImageModal();
-                } catch (e) { hideLoading(); showNotification('Gagal', 'error'); }
-            });
-            document.getElementById('removeImageBtn').addEventListener('click', () => {
-                if (!confirm('Hapus foto?')) return;
-                showLoading();
-                setTimeout(() => {
-                    if (currentUploadType === 'profile') {
-                        if (appData.user.profileImageKey) removeImage(appData.user.profileImageKey);
-                        appData.user.profileImage = null; appData.user.profileImageKey = null;
-                        renderProfileImage();
-                    } else if (currentUploadType === 'work' && currentItemId) {
-                        const work = appData.pages.work.items.find(w => w.id === currentItemId);
-                        if (work) {
-                            if (work.imageKey) removeImage(work.imageKey);
-                            work.image = null; work.imageKey = null;
-                            renderWorkPage();
-                        }
-                    } else if (currentUploadType === 'achievement' && currentItemId) {
-                        const ach = appData.pages.achievements.items.find(a => a.id === currentItemId);
-                        if (ach) {
-                            if (ach.imageKey) removeImage(ach.imageKey);
-                            ach.image = null; ach.imageKey = null;
-                            renderAchievementsPage();
-                        }
-                    }
-                    saveToStorage();
-                    hideLoading();
-                    closeModal(imageModal);
-                    resetImageModal();
-                }, 300);
-            });
-            document.getElementById('cancelImageBtn').addEventListener('click', () => { closeModal(imageModal); resetImageModal(); });
-            document.getElementById('closeImageModal').addEventListener('click', () => { closeModal(imageModal); resetImageModal(); });
+        // ==================== CHAT ====================
+        function setupChat() {
+            document.getElementById('sendMessage').addEventListener('click', sendMessage);
+            document.getElementById('chatInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+        }
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (!text) return;
+            const now = new Date();
+            const time = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}, ${now.getHours()}:${now.getMinutes().toString().padStart(2,'0')}`;
+            appData.pages.chat.messages.push({ user: 'You', time: time, text: text });
+            renderChat();
+            input.value = '';
+            saveToLocalStorage();
+            // auto reply
+            setTimeout(() => {
+                appData.pages.chat.messages.push({ user: 'Arya Savariansah', time: time, text: 'Thanks for your message!' });
+                renderChat();
+                saveToLocalStorage();
+            }, 1000);
+        }
 
-            // Work modal
-            const workModal = document.getElementById('workUploadModal');
-            document.getElementById('workImageInput').addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                if (file.size > 5*1024*1024) { showNotification('Max 5MB', 'error'); return; }
-                if (!file.type.startsWith('image/')) { showNotification('Bukan gambar', 'error'); return; }
-                currentImageFile = file;
-                const reader = new FileReader();
-                reader.onload = (ev) => { currentImageUrl = ev.target.result; document.getElementById('workPreviewImage').src = ev.target.result; document.getElementById('workImagePreview').style.display = 'block'; };
-                reader.readAsDataURL(file);
-            });
-            document.getElementById('workUploadForm').addEventListener('submit', async (e) => {
+        // ==================== CONTACT FORM ====================
+        function setupContactForm() {
+            document.getElementById('contactForm').addEventListener('submit', (e) => {
                 e.preventDefault();
-                if (!isAdminLoggedIn && !isEditMode) { showNotification('Login admin dulu', 'error'); return; }
-                const title = document.getElementById('workTitle').value.trim();
-                const date = document.getElementById('workDate').value.trim();
-                const category = document.getElementById('workCategory').value;
-                const desc = document.getElementById('workDescription').value.trim();
-                if (!title || !date || !category || !desc) { showNotification('Isi semua', 'error'); return; }
-                if (!/^\d{2}\/\d{2}\/\d{4}$/.test(date)) { showNotification('Format tanggal DD/MM/YYYY', 'error'); return; }
-                showLoading(editingWorkId ? 'Mengupdate...' : 'Menyimpan...');
-                try {
-                    let finalUrl = currentImageUrl, finalKey = null;
-                    if (currentImageFile) {
-                        const up = await uploadImage(currentImageFile, 'work', editingWorkId || `work_${Date.now()}`);
-                        finalUrl = up.dataUrl; finalKey = up.key;
-                    }
-                    if (editingWorkId) {
-                        const work = appData.pages.work.items.find(w => w.id === editingWorkId);
-                        if (work) {
-                            if (currentImageFile && work.imageKey) removeImage(work.imageKey);
-                            work.title = title; work.date = date; work.category = category; work.description = desc;
-                            if (currentImageFile) { work.image = finalUrl; work.imageKey = finalKey; }
-                        }
-                    } else {
-                        const newWork = { id: 'work_' + Date.now(), title, date, category, description: desc, image: finalUrl, imageKey: finalKey };
-                        appData.pages.work.items.unshift(newWork);
-                    }
-                    renderWorkPage();
-                    saveToStorage();
+                showLoading('Mengirim...');
+                setTimeout(() => {
+                    alert('Pesan terkirim (simulasi)');
+                    document.getElementById('contactForm').reset();
                     hideLoading();
-                    closeModal(workModal);
-                    resetWorkModal();
-                } catch (err) { hideLoading(); showNotification('Gagal', 'error'); }
-            });
-            document.getElementById('cancelWorkBtn').addEventListener('click', () => { closeModal(workModal); resetWorkModal(); });
-            document.getElementById('closeWorkModal').addEventListener('click', () => { closeModal(workModal); resetWorkModal(); });
-
-            // Close modals on outside click
-            document.querySelectorAll('.modal').forEach(m => {
-                m.addEventListener('click', (e) => { if (e.target === m) { closeModal(m); if (m === imageModal) resetImageModal(); if (m === workModal) resetWorkModal(); } });
+                }, 1000);
             });
         }
 
-        function setupResponsive() {
-            const handle = () => {
-                const sidebar = document.getElementById('sidebar');
-                if (window.innerWidth <= 768) {
-                    document.getElementById('mobileMenuToggle').style.display = 'block';
-                    document.getElementById('mainContent').style.marginLeft = '0';
-                } else {
-                    document.getElementById('mobileMenuToggle').style.display = 'none';
-                    sidebar.classList.remove('active');
-                    document.getElementById('mainContent').style.marginLeft = sidebar.offsetWidth + 'px';
-                }
+        // ==================== MOBILE ====================
+        function setupMobileMenu() {
+            document.getElementById('mobileMenuToggle').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.toggle('active');
+            });
+        }
+
+        // ==================== MODAL FOTO ====================
+        function setupModals() {
+            const modal = document.getElementById('imageUploadModal');
+            const close = document.getElementById('closeImageModal');
+            const cancel = document.getElementById('cancelImageBtn');
+            const save = document.getElementById('saveImageBtn');
+            const remove = document.getElementById('removeImageBtn');
+            const input = document.getElementById('imageInput');
+            const preview = document.getElementById('previewImage');
+            let currentType = null, currentId = null, currentFile = null;
+
+            window.openImageUploadModal = (type, id) => {
+                currentType = type; currentId = id;
+                document.getElementById('modalTitle').innerText = type === 'profile' ? 'Upload Foto Profile' : 'Upload Foto';
+                preview.src = '';
+                input.value = '';
+                modal.classList.add('active');
             };
-            window.addEventListener('resize', handle);
-            handle();
-        }
 
-        // ==================== INIT ====================
-        document.addEventListener('DOMContentLoaded', () => {
-            loadFromStorage();
-            setupNavigation();
-            setupMobileMenu();
-            setupAdminPanel();
-            setupChat();
-            setupContactForm();
-            setupModals();
-            setupEffects();
-            setupResponsive();
-            renderPage('home');
-            renderProfileImage();
-
-            document.getElementById('addWorkBtn').addEventListener('click', () => openWorkUploadModal());
-            document.getElementById('floatingAddBtn').addEventListener('click', () => openWorkUploadModal());
-
-            document.getElementById('profileImg').addEventListener('click', () => {
-                if (appData.user.profileImage) openImagePreview(appData.user.profileImage, 'Profile');
-            });
-
-            setInterval(cleanupUnusedImages, 60000);
-        });
-
-        function cleanupUnusedImages() {
-            const usedKeys = new Set();
-            if (appData.user.profileImageKey) usedKeys.add(appData.user.profileImageKey);
-            appData.pages.work.items.forEach(w => { if (w.imageKey) usedKeys.add(w.imageKey); });
-            appData.pages.achievements.items.forEach(a => { if (a.imageKey) usedKeys.add(a.imageKey); });
-            Object.keys(localStorage).forEach(key => {
-                if ((key.startsWith('work_') || key.startsWith('achievement_') || key.startsWith('profile_')) && !usedKeys.has(key)) {
-                    localStorage.removeItem(key);
+            input.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    if (file.size > 5*1024*1024) return showNotification('Max 5MB', 'error');
+                    currentFile = file;
+                    const reader = new FileReader();
+                    reader.onload = (ev) => { preview.src = ev.target.result; };
+                    reader.readAsDataURL(file);
                 }
             });
+
+            save.addEventListener('click', async () => {
+                if (!currentFile) return showNotification('Pilih file', 'error');
+                showLoading('Upload...');
+                const reader = new FileReader();
+                reader.onload = async (ev) => {
+                    const base64 = ev.target.result;
+                    if (currentType === 'profile') {
+                        appData.user.profileImage = base64;
+                        renderProfileImage();
+                    } else if (currentType === 'achievement' && currentId) {
+                        const ach = appData.pages.achievements.items.find(a => a.id === currentId);
+                        if (ach) ach.image = base64;
+                        renderAchievements();
+                    }
+                    saveToLocalStorage();
+                    hideLoading();
+                    modal.classList.remove('active');
+                    showNotification('Foto tersimpan', 'success');
+                };
+                reader.readAsDataURL(currentFile);
+            });
+
+            close.addEventListener('click', () => modal.classList.remove('active'));
+            cancel.addEventListener('click', () => modal.classList.remove('active'));
+            remove.addEventListener('click', () => { /* hapus gambar */ modal.classList.remove('active'); });
         }
+
+        // ==================== EFEK ====================
+        function setupEffects() {
+            document.getElementById('effectToggle').addEventListener('click', toggleEffects);
+        }
+        function showEffectToggle(text, icon) {
+            const btn = document.getElementById('effectToggle');
+            btn.querySelector('#effectText').textContent = text;
+            btn.querySelector('#effectIcon').className = icon;
+            btn.style.display = 'flex';
+            currentEffectPage = currentPage;
+        }
+        function hideEffectToggle() { document.getElementById('effectToggle').style.display = 'none'; }
+        function toggleEffects() {
+            if (currentEffectPage === 'about') toggleRainEffect();
+            else if (currentEffectPage === 'chatroom') toggleStarfallEffect();
+        }
+        function toggleRainEffect() {
+            rainEffectActive = !rainEffectActive;
+            const container = document.getElementById('rainContainer');
+            if (rainEffectActive) {
+                container.style.display = 'block';
+                for (let i=0; i<50; i++) {
+                    let drop = document.createElement('div');
+                    drop.className = 'rain-drop';
+                    drop.style.left = Math.random()*100+'%';
+                    drop.style.animationDelay = Math.random()*2+'s';
+                    drop.style.animationDuration = (0.5+Math.random()*0.5)+'s';
+                    container.appendChild(drop);
+                }
+            } else { container.innerHTML = ''; container.style.display = 'none'; }
+        }
+        function toggleStarfallEffect() {
+            starfallEffectActive = !starfallEffectActive;
+            const container = document.getElementById('starfallContainer');
+            if (starfallEffectActive) {
+                container.style.display = 'block';
+                for (let i=0; i<30; i++) {
+                    let star = document.createElement('div');
+                    star.className = 'star';
+                    star.style.left = Math.random()*100+'%';
+                    star.style.animationDelay = Math.random()*3+'s';
+                    star.style.animationDuration = (1+Math.random()*2)+'s';
+                    star.style.width = star.style.height = (2+Math.random()*3)+'px';
+                    container.appendChild(star);
+                }
+            } else { container.innerHTML = ''; container.style.display = 'none'; }
+        }
+
+        // ==================== UTILITAS ====================
+        function showLoading(t) { document.getElementById('loadingText').innerText = t; document.getElementById('loadingOverlay').classList.add('active'); }
+        function hideLoading() { document.getElementById('loadingOverlay').classList.remove('active'); }
+        function showNotification(msg, type) {
+            const n = document.getElementById('notification');
+            n.innerText = msg;
+            n.style.background = type==='success' ? 'var(--gradient-gold)' : type==='error' ? 'var(--gradient-danger)' : 'var(--gradient-gold)';
+            n.style.display = 'block';
+            setTimeout(() => n.style.display = 'none', 3000);
+        }
+
+        // ==================== EXPOSE FUNCTIONS ====================
+        window.changePage = changePage;
+        window.openImageUploadModal = openImageUploadModal;
+        window.editAchievement = (id) => {
+            const ach = appData.pages.achievements.items.find(a => a.id === id);
+            if (!ach) return;
+            const title = prompt('Judul:', ach.title); if (title===null) return;
+            const date = prompt('Tanggal:', ach.date); if (date===null) return;
+            const desc = prompt('Deskripsi:', ach.description); if (desc===null) return;
+            ach.title = title; ach.date = date; ach.description = desc;
+            renderAchievements(); saveToLocalStorage();
+        };
+        window.deleteAchievement = (id) => {
+            if (!confirm('Hapus?')) return;
+            appData.pages.achievements.items = appData.pages.achievements.items.filter(a => a.id !== id);
+            renderAchievements(); saveToLocalStorage();
+        };
     </script>
 </body>
 </html>
